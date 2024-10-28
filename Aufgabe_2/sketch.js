@@ -77,6 +77,7 @@ let canvasHeight = 400;
 function preload() {
   // Load the background image
   // Note: Replace this URL with the actual URL of your alleyway image
+  // Image credit: https://picsum.photos/images#2 (Image ID: 57)
   const imageUrl = `https://picsum.photos/id/57/${canvasWidth}/${canvasHeight}`;
   bgImage = loadImage(imageUrl);
 }
