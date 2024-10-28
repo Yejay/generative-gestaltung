@@ -63,7 +63,6 @@
 
 
 // TODO
-
 // Configuration variables
 let inc = 0.1;
 let scl = 20;
@@ -72,15 +71,18 @@ let zoff = 0;
 let particles = [];
 let flowfield;
 let bgImage; // Variable to store the background image
+let canvasWidth = 600;
+let canvasHeight = 400;
 
 function preload() {
   // Load the background image
   // Note: Replace this URL with the actual URL of your alleyway image
-  bgImage = loadImage('https://unsplash.com/photos/gray-concrete-road-between-brown-and-green-leaf-trees-at-daytime-5hvn-2WW6rY');
+  const imageUrl = `https://picsum.photos/id/57/${canvasWidth}/${canvasHeight}`;
+  bgImage = loadImage(imageUrl);
 }
 
 function setup() {
-  createCanvas(600, 400);
+  createCanvas(canvasWidth, canvasHeight);
   cols = floor(width / scl);
   rows = floor(height / scl);
 
@@ -128,6 +130,6 @@ function draw() {
 
   // Draw ground (optional, depending on your background image)
   noStroke();
-  // fill('rgba(101, 67, 33, 0.5)');  // Semi-transparent brown
-  // rect(0, height - 50, width, 50);
+  fill('rgba(101, 67, 33, 0.5)');  // Semi-transparent brown
+  rect(0, height - 50, width, 50);
 }
