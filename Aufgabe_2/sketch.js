@@ -76,7 +76,7 @@ let bgImage; // Variable to store the background image
 function preload() {
   // Load the background image
   // Note: Replace this URL with the actual URL of your alleyway image
-  bgImage = loadImage('autumn-street.jpg');
+  bgImage = loadImage('https://unsplash.com/photos/gray-concrete-road-between-brown-and-green-leaf-trees-at-daytime-5hvn-2WW6rY');
 }
 
 function setup() {
