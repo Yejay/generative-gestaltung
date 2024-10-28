@@ -130,7 +130,7 @@ function draw() {
   }
 
   // Draw ground (optional, depending on your background image)
-  noStroke();
-  fill('rgba(101, 67, 33, 0.5)');  // Semi-transparent brown
-  rect(0, height - 50, width, 50);
+  // noStroke();
+  // fill('rgba(101, 67, 33, 0.5)');  // Semi-transparent brown
+  // rect(0, height - 50, width, 50);
 }
