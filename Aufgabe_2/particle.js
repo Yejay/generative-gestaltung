@@ -1,18 +1,17 @@
 class Leaf {
     constructor() {
-      // Initialize leaf properties
       this.pos = createVector(random(width), random(-50, 0));
       this.vel = createVector(0, 0);
       this.acc = createVector(0, 0);
-      this.maxspeed = random(1, 5);  // Adjust leaf speed range here
+      this.maxspeed = random(1, 5);
       this.color = color(random([
         '#e63946',  // Red
         '#f4a261',  // Orange
         '#e9c46a',  // Yellow
         '#2a9d8f',  // Green
-      ]));  // Adjust or add leaf colors here
-      this.size = random(10, 20);  // Adjust leaf size range here
-      this.shapeType = floor(random(4));  // Assign a shape type from 0 to 3
+      ]));
+      this.size = random(10, 20);
+      this.shapeType = floor(random(4));
     }
   
     update() {
@@ -34,7 +33,6 @@ class Leaf {
     }
   
     applyForce(force) {
-      // Apply force to leaf
       this.acc.add(force);
     }
   
@@ -76,11 +74,8 @@ class Leaf {
     pop();
     }
   
-    // TODO
     edges() {
-      // Reset leaf position when it goes off screen
-      const groundHeight = 0;  // If rect aka ground is visible in sketch.js, set this to 50 otherwise 0
-      if (this.pos.y > height - groundHeight || this.pos.x > width || this.pos.x < 0) {
+      if (this.pos.y > height  || this.pos.x > width || this.pos.x < 0) {
         this.reset();
       }
     }
