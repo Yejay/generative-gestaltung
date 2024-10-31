@@ -12,6 +12,7 @@ class Leaf {
         '#2a9d8f',  // Green
       ]));  // Adjust or add leaf colors here
       this.size = random(10, 20);  // Adjust leaf size range here
+      this.shapeType = floor(random(4));  // Assign a shape type from 0 to 3
     }
   
     update() {
@@ -45,11 +46,34 @@ class Leaf {
       translate(this.pos.x, this.pos.y);
       rotate(this.vel.heading() + PI / 2);
       beginShape();
-      vertex(0, -this.size);
-      bezierVertex(this.size / 2, -this.size / 2, this.size / 2, this.size / 2, 0, this.size);
-      bezierVertex(-this.size / 2, this.size / 2, -this.size / 2, -this.size / 2, 0, -this.size);
-      endShape(CLOSE);
-      pop();
+      switch (this.shapeType) {
+        case 0: // Shape 1 - Original Leaf
+            vertex(0, -this.size);
+            bezierVertex(this.size / 2, -this.size / 2, this.size / 2, this.size / 2, 0, this.size);
+            bezierVertex(-this.size / 2, this.size / 2, -this.size / 2, -this.size / 2, 0, -this.size);
+            break;
+
+        case 1: // Shape 2 - Longer, thinner leaf
+            vertex(0, -this.size);
+            bezierVertex(this.size / 3, -this.size / 1.5, this.size / 2, this.size / 1.5, 0, this.size);
+            bezierVertex(-this.size / 2, this.size / 1.5, -this.size / 3, -this.size / 1.5, 0, -this.size);
+            break;
+
+        case 2: // Shape 3 - Rounded leaf
+            vertex(0, -this.size);
+            bezierVertex(this.size, -this.size / 2, this.size, this.size / 2, 0, this.size);
+            bezierVertex(-this.size, this.size / 2, -this.size, -this.size / 2, 0, -this.size);
+            break;
+
+        case 3: // Shape 4 - Pointed leaf with curve
+            vertex(0, -this.size);
+            bezierVertex(this.size / 1.5, -this.size / 3, this.size / 1.5, this.size / 2, 0, this.size);
+            bezierVertex(-this.size / 1.5, this.size / 2, -this.size / 1.5, -this.size / 3, 0, -this.size);
+            break;
+    }
+
+    endShape(CLOSE);
+    pop();
     }
   
     // TODO
