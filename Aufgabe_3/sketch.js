@@ -7,6 +7,7 @@ let time = 0;
 let wordIndex = 0;
 let attractMode = true;
 let forceActive = false;
+let showFpsCounter = false;
 let font;
 
 const WORDS = ['DREAM', 'MAGIC', 'CHAOS', 'SPACE', 'FUCK'];
@@ -111,9 +112,7 @@ function draw() {
     time += 0.01;  // Updates global time variable
 
     // Shows FPS counter
-    fill(0, 0, 100);
-    noStroke();
-    text('FPS: ' + floor(frameRate()), 10, 20);
+    showFps();
 }
 
 function drawNebulae() {
@@ -213,6 +212,17 @@ function keyPressed() {
 		wordIndex = (wordIndex + 1) % WORDS.length;
 		generateTextPoints(WORDS[wordIndex]);
 	}
+    if (key === 'f') {
+        showFpsCounter = !showFpsCounter;
+    }
+}
+
+function showFps() {
+    if (showFpsCounter) {
+        fill(0, 0, 100);
+        noStroke();
+        text('FPS: ' + floor(frameRate()), 10, 20);
+    }
 }
 
 function mousePressed() {
