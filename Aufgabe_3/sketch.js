@@ -3,24 +3,13 @@ let stars = [];
 let comets = [];
 let vehicles = [];
 let targetPoints = [];
-let flowField = [];
-let shockwaves = [];
 let time = 0;
 let wordIndex = 0;
-let isTransitioning = false;
 let attractMode = true;
 let forceActive = false;
-let galaxyAngle = 0;
-let lastFlowFieldUpdate = 0;
-let targetFPS = 30;
-let skipCount = 0;
 let font;
 
-const WORDS = ['DREAM', 'MAGIC', 'CHAOS', 'SPACE'];
-const CELL_SIZE = 10;
-const FLOW_UPDATE_INTERVAL = 100; // ms zwischen Flow Field Updates
-const COLS = Math.floor(window.innerWidth / CELL_SIZE);
-const ROWS = Math.floor(window.innerHeight / CELL_SIZE);
+const WORDS = ['DREAM', 'MAGIC', 'CHAOS', 'SPACE', 'FUCK'];
 
 function preload() {
 	font = loadFont(
@@ -35,7 +24,6 @@ function setup() {
 
 	// Initialize other components
 	initEffects();
-	initFlowField();
 	generateTextPoints(WORDS[wordIndex]);
 }
 
@@ -65,16 +53,6 @@ function initEffects() {
 	}
 }
 
-function initFlowField() {
-	flowField = Array(ROWS)
-		.fill()
-		.map(() =>
-			Array(COLS)
-				.fill()
-				.map(() => noise(random(1000)) * TWO_PI)
-		);
-}
-
 function createNewComet() {
 	comets.push({
 		pos: createVector(random(width), random(height)),
@@ -87,139 +65,134 @@ function createNewComet() {
 }
 
 function generateTextPoints(text) {
-	vehicles = [];
-	targetPoints = [];
+    // Resets arrays for new text
+    vehicles = [];
+    targetPoints = [];
 
-	// Get text bounds first to calculate centering
-	let fontSize = text.length > 4 ? 120 : 150;
-	let bounds = font.textBounds(text, 0, 0, fontSize);
+    // Adjusts font size based on text length
+    let fontSize = text.length > 4 ? 120 : 150;
+    
+    // Calculates text boundaries for centering
+    let bounds = font.textBounds(text, 0, 0, fontSize);
+    let centerX = width / 2 - bounds.w / 2;
+    let centerY = height / 2 + bounds.h / 2;
 
-	// Calculate center position
-	let centerX = width / 2 - bounds.w / 2;
-	let centerY = height / 2 + bounds.h / 2;
+    // Converts text to points using p5.js font functions
+    let points = font.textToPoints(text, centerX, centerY, fontSize, {
+        sampleFactor: 0.1,  // Controls point density
+        simplifyThreshold: 0
+    });
 
-	// Get points for the text
-	let points = font.textToPoints(text, centerX, centerY, fontSize, {
-		sampleFactor: 0.1, // Adjust this value to get more or fewer points
-		simplifyThreshold: 0,
-	});
-
-	// Create only one vehicle per point
-	for (let p of points) {
-		// Create vehicle with random start position but fixed target
-		let vehicle = new Vehicle(
-			random(width),
-			random(height), // Random start position
-			p.x,
-			p.y // Target position is the text point
-		);
-		vehicles.push(vehicle);
-		targetPoints.push(createVector(p.x, p.y));
-	}
+    // Creates vehicles (particles) for each point
+    for (let p of points) {
+        // Each vehicle starts at random position but has fixed target
+        let vehicle = new Vehicle(
+            random(width),
+            random(height),
+            p.x,
+            p.y
+        );
+        vehicles.push(vehicle);
+        targetPoints.push(createVector(p.x, p.y));
+    }
 }
 
 function draw() {
-	// Draw directly to canvas instead of buffer
-	background(240, 30, 15);
+    // Main animation loop that runs continuously
+    background(240, 30, 15);  // Sets dark background
 
-	// Draw main effects directly
-	drawNebulae(1);
-	drawStars(1);
+    // Draws all visual elements in order
+    drawNebulae(1);
+    drawStars(1);
+    updateAndDrawComets();
+    updateMainParticles(1);
+    drawForceIndicator();
 
-	updateAndDrawComets();
+    time += 0.01;  // Updates global time variable
 
-	updateMainParticles(1);
-	drawForceIndicator();
-
-	time += 0.01;
-
-	// Debug Info
-	fill(0, 0, 100);
-	noStroke();
-	text('FPS: ' + floor(frameRate()), 10, 20);
+    // Shows FPS counter
+    fill(0, 0, 100);
+    noStroke();
+    text('FPS: ' + floor(frameRate()), 10, 20);
 }
 
 function drawNebulae() {
-	noStroke();
+    // Creates cloud-like shapes using Perlin noise
+    noStroke();
 
-	for (let nebula of nebulae) {
-		push();
-		translate(nebula.x, nebula.y);
-		fill(nebula.hue, 60, 80, nebula.alpha);
+    for (let nebula of nebulae) {
+        push();  // Saves current drawing state
+        translate(nebula.x, nebula.y);  // Moves drawing origin to nebula center
+        fill(nebula.hue, 60, 80, nebula.alpha);
 
-		beginShape();
-		for (let a = 0; a < TWO_PI; a += 0.5) {
-			let r =
-				nebula.size * noise(cos(a) + nebula.offset, sin(a) + nebula.offset);
-			let x = r * cos(a);
-			let y = r * sin(a);
-			vertex(x, y);
-		}
-		endShape(CLOSE);
+        // Creates organic shape using vertices in a circle
+        beginShape();
+        for (let a = 0; a < TWO_PI; a += 0.5) {
+            // Uses Perlin noise to create irregular radius
+            let r = nebula.size * noise(cos(a) + nebula.offset, sin(a) + nebula.offset);
+            let x = r * cos(a);
+            let y = r * sin(a);
+            vertex(x, y);
+        }
+        endShape(CLOSE);
 
-		pop();
-	}
+        pop();  // Restores drawing state
+    }
 }
 
 function drawStars() {
-	noStroke();
-	fill(0, 0, 100, 0.8);
+    // Draws simple white dots (stars) at random fixed positions
+    noStroke();
+    fill(0, 0, 100, 0.8);  // White color with 80% opacity
 
-	for (let star of stars) {
-		ellipse(star.x, star.y, 2);
-	}
+    for (let star of stars) {
+        ellipse(star.x, star.y, 2);
+    }
 }
 
 function updateAndDrawComets() {
-	for (let comet of comets) {
-		// Move comet
-		comet.pos.add(comet.vel);
+    for (let comet of comets) {
+        // Updates comet position based on its velocity
+        comet.pos.add(comet.vel);
 
-		// Draw comet
-		noStroke();
+        // Draws the comet's tail using 3 gradually fading circles
+        for (let i = 3; i > 0; i--) {
+            let alpha = 0.3 / i;  // Decreasing opacity for tail effect
+            fill(comet.hue, 80, 100, alpha);
+            ellipse(
+                comet.pos.x - comet.vel.x * i * 2,  // Position offset based on velocity
+                comet.pos.y - comet.vel.y * i * 2,
+                8
+            );
+        }
 
-		// Draw tail (3 circles getting bigger and more transparent)
-		for (let i = 3; i > 0; i--) {
-			let alpha = 0.3 / i; // Gets more transparent as circles get bigger
-			fill(comet.hue, 80, 100, alpha);
-			ellipse(
-				comet.pos.x - comet.vel.x * i * 2,
-				comet.pos.y - comet.vel.y * i * 2,
-				8
-			);
-		}
+        // Draws the comet's head
+        fill(comet.hue, 80, 100);
+        ellipse(comet.pos.x, comet.pos.y, 6);
 
-		// Draw comet head
-		fill(comet.hue, 80, 100);
-		ellipse(comet.pos.x, comet.pos.y, 6);
+        // Marks comets as dead if they move off-screen
+        if (comet.pos.x < 0 || comet.pos.x > width ||
+            comet.pos.y < 0 || comet.pos.y > height) {
+            comet.alive = false;
+        }
+    }
 
-		// Remove if off screen
-		if (
-			comet.pos.x < 0 ||
-			comet.pos.x > width ||
-			comet.pos.y < 0 ||
-			comet.pos.y > height
-		) {
-			comet.alive = false;
-		}
-	}
-
-	// Keep 3 comets on screen
-	comets = comets.filter((c) => c.alive);
-	while (comets.length < 3) {
-		createNewComet();
-	}
+    // Maintains exactly 3 comets by removing dead ones and creating new ones
+    comets = comets.filter((c) => c.alive);
+    while (comets.length < 3) {
+        createNewComet();
+    }
 }
 
 function updateMainParticles(intensity) {
-	for (let vehicle of vehicles) {
-		vehicle.behaviors(intensity);
-		vehicle.update();
-		vehicle.display(intensity);
-	}
+    // Iterates through all vehicle objects (text particles)
+    for (let vehicle of vehicles) {
+        vehicle.move(intensity);    // Calculates new position based on forces
+        vehicle.update();          // Updates the position
+        vehicle.show(intensity);   // Renders the particle on screen
+    }
 }
 
-// TODO
 function drawForceIndicator() {
 	noCursor();
 	if (forceActive) {
@@ -235,21 +208,10 @@ function drawForceIndicator() {
 	}
 }
 
-// TODO explain the code
 function keyPressed() {
-	if (key === ' ' && !isTransitioning) {
-		isTransitioning = true;
-
-		for (let vehicle of vehicles) {
-			vehicle.target = createVector(
-				random([-100, width + 100]),
-				random([-100, height + 100])
-			);
-		}
-
+	if (key === ' ') {
 		wordIndex = (wordIndex + 1) % WORDS.length;
 		generateTextPoints(WORDS[wordIndex]);
-		isTransitioning = false;
 	}
 }
 
