@@ -1,4 +1,3 @@
-// Optimierte Partikelanimation mit allen Effekten
 let nebulae = [];
 let stars = [];
 let comets = [];
@@ -12,8 +11,6 @@ let isTransitioning = false;
 let attractMode = true;
 let forceActive = false;
 let galaxyAngle = 0;
-let fft;
-let mic;
 let buffer;
 let lastFlowFieldUpdate = 0;
 let targetFPS = 30;
@@ -26,30 +23,14 @@ const COLS = Math.floor(window.innerWidth / CELL_SIZE);
 const ROWS = Math.floor(window.innerHeight / CELL_SIZE);
 
 function setup() {
-	// Create canvas first
 	createCanvas(windowWidth, windowHeight, WEBGL);
+	// TODO
 	pixelDensity(1);
 	colorMode(HSB, 360, 100, 100, 1.0);
 
 	// Create buffer
 	buffer = createGraphics(width, height);
 	buffer.colorMode(HSB, 360, 100, 100, 1.0);
-
-	// Audio Setup with error handling
-	try {
-		mic = new p5.AudioIn();
-		mic.start();
-		fft = new p5.FFT();
-		fft.setInput(mic);
-	} catch (e) {
-		console.error('Audio initialization failed:', e);
-		// Provide fallback values
-		mic = { getLevel: () => 0.5 };
-		fft = {
-			analyze: () => new Array(1024).fill(128),
-			getEnergy: () => 128,
-		};
-	}
 
 	// Initialize other components
 	initEffects();
@@ -65,7 +46,7 @@ function initEffects() {
 			y: random(height),
 			size: random(100, 300),
 			hue: random(360),
-			speed: random(0.0001, 0.001),
+			alpha: random(0.1, 0.2),
 			offset: random(1000),
 		});
 	}
@@ -75,8 +56,6 @@ function initEffects() {
 		x: random(width),
 		y: random(height),
 		size: random(1, 3),
-		twinkleSpeed: random(0.02, 0.05),
-		twinkleOffset: random(1000),
 	}));
 
 	// Kometen initialisieren
@@ -118,7 +97,7 @@ function generateTextPoints(text) {
 	tempBuffer.text(text, width / 2, height / 2);
 
 	tempBuffer.loadPixels();
-	for (let i = 0; i < width; i += 6) {
+	for (let i = 0; i < width; i += 10) {
 		for (let j = 0; j < height; j += 6) {
 			let index = (i + j * width) * 4;
 			if (tempBuffer.pixels[index] > 128) {
@@ -150,25 +129,15 @@ function draw() {
 	clear();
 	translate(-width / 2, -height / 2);
 
-	// Audio Analyse
-	let spectrum = fft.analyze();
-	let bass = fft.getEnergy('bass');
-	let treble = fft.getEnergy('treble');
-	let soundLevel = mic.getLevel();
-
-	let bassIntensity = map(bass, 0, 255, 0.5, 1.5);
-	let trebleIntensity = map(treble, 0, 255, 0.5, 1.5);
-	let soundIntensity = map(soundLevel, 0, 1, 0.5, 2);
-
 	// Buffer aktualisieren
 	buffer.clear();
 
 	// Haupteffekte zeichnen
-	drawBackgroundToBuffer(bassIntensity);
+	drawBackgroundToBuffer(1);
 
 	// Flow Field aktualisieren
 	if (millis() - lastFlowFieldUpdate > FLOW_UPDATE_INTERVAL) {
-		updateFlowField(soundIntensity);
+		updateFlowField(1);
 		lastFlowFieldUpdate = millis();
 	}
 
@@ -176,7 +145,7 @@ function draw() {
 	updateShockwaves();
 
 	// Hauptpartikel aktualisieren
-	updateMainParticles(trebleIntensity);
+	updateMainParticles(1);
 
 	// Buffer auf Hauptcanvas zeichnen
 	image(buffer, 0, 0);
@@ -217,40 +186,35 @@ function drawBackgroundToBuffer(intensity) {
 	updateAndDrawComets();
 }
 
-function drawNebulae(intensity) {
+function drawNebulae() {
 	buffer.noStroke();
 
 	for (let nebula of nebulae) {
-		let size = nebula.size * (1 + intensity * 0.2);
-		let alpha = map(noise(nebula.offset + time * 0.3), 0, 1, 0.1, 0.3);
-
 		buffer.push();
 		buffer.translate(nebula.x, nebula.y);
-		buffer.fill(nebula.hue, 60, 80, alpha);
+		buffer.fill(nebula.hue, 60, 80, nebula.alpha);
 
+		// Simplified noise-based shape
 		buffer.beginShape();
-		for (let a = 0; a < TWO_PI; a += 0.4) {
+		for (let a = 0; a < TWO_PI; a += 0.5) {
 			let r =
-				size * noise(cos(a) + time * 0.1, sin(a) + time * 0.1, nebula.offset);
-			buffer.vertex(r * cos(a), r * sin(a));
+				nebula.size * noise(cos(a) + nebula.offset, sin(a) + nebula.offset);
+			let x = r * cos(a);
+			let y = r * sin(a);
+			buffer.vertex(x, y);
 		}
 		buffer.endShape(CLOSE);
 
 		buffer.pop();
-		nebula.offset += 0.001;
 	}
 }
 
-function drawStars(intensity) {
+function drawStars() {
 	buffer.noStroke();
+	buffer.fill(0, 0, 100, 0.8);
 
 	for (let star of stars) {
-		let twinkle = sin(time * star.twinkleSpeed + star.twinkleOffset);
-		let size = star.size * (1 + twinkle * 0.5) * (1 + intensity * 0.2);
-		let alpha = map(twinkle, -1, 1, 0.5, 1);
-
-		buffer.fill(0, 0, 100, alpha);
-		buffer.ellipse(star.x, star.y, size);
+		buffer.ellipse(star.x, star.y, 2);
 	}
 }
 
@@ -413,132 +377,6 @@ function drawForceIndicator() {
 			}
 		}
 		pop();
-	}
-}
-
-class Vehicle {
-	constructor(x, y, targetX, targetY) {
-		this.pos = createVector(x, y);
-		this.vel = p5.Vector.random2D();
-		this.acc = createVector();
-		this.target = createVector(targetX, targetY);
-		this.maxSpeed = random(8, 12);
-		this.maxForce = random(0.8, 1.2);
-		this.r = random(4, 8);
-		this.hue = random(360);
-		this.trailPoints = [];
-	}
-
-	behaviors(intensity) {
-		let arrive = this.arrive(this.target);
-		let wander = this.wander();
-
-		arrive.mult(0.6);
-		wander.mult(0.1);
-
-		this.applyForce(arrive);
-		this.applyForce(wander);
-	}
-
-	arrive(target) {
-		let desired = p5.Vector.sub(target, this.pos);
-		let d = desired.mag();
-		let speed = this.maxSpeed;
-
-		if (d < 100) {
-			speed = map(d, 0, 100, 0, this.maxSpeed);
-		}
-
-		desired.setMag(speed);
-		let steer = p5.Vector.sub(desired, this.vel);
-		steer.limit(this.maxForce);
-		return steer;
-	}
-
-	wander() {
-		let angle = noise(this.pos.x * 0.01, this.pos.y * 0.01, time) * TWO_PI * 2;
-		return p5.Vector.fromAngle(angle).mult(0.1);
-	}
-
-	attract(target) {
-		let force = p5.Vector.sub(target, this.pos);
-		let d = force.mag();
-		d = constrain(d, 20, 100);
-		force.normalize();
-		let strength = 0.5 / (d * 0.05);
-		force.mult(strength);
-		return force;
-	}
-
-	repel(target) {
-		let force = p5.Vector.sub(this.pos, target);
-		let d = force.mag();
-		d = constrain(d, 20, 100);
-		force.normalize();
-		let strength = 0.8 / (d * 0.05);
-		force.mult(strength);
-		return force;
-	}
-
-	update() {
-		this.pos.add(this.vel);
-		this.vel.add(this.acc);
-		this.vel.limit(this.maxSpeed);
-		this.acc.mult(0);
-
-		this.trailPoints.unshift({ pos: this.pos.copy(), alpha: 1 });
-		if (this.trailPoints.length > 10) {
-			this.trailPoints.pop();
-		}
-
-		for (let point of this.trailPoints) {
-			point.alpha *= 0.8;
-		}
-
-		if (this.pos.x > width) this.pos.x = 0;
-		if (this.pos.x < 0) this.pos.x = width;
-		if (this.pos.y > height) this.pos.y = 0;
-		if (this.pos.y < 0) this.pos.y = height;
-	}
-
-	display(intensity) {
-		// Trail zeichnen
-		for (let i = 0; i < this.trailPoints.length; i++) {
-			let point = this.trailPoints[i];
-			let size = map(i, 0, this.trailPoints.length, this.r, 1);
-
-			buffer.noStroke();
-			buffer.fill(this.hue, 80, 100, point.alpha * 0.3);
-			buffer.ellipse(point.pos.x, point.pos.y, size * intensity * 2);
-		}
-
-		// Hauptpartikel zeichnen
-		buffer.push();
-		buffer.translate(this.pos.x, this.pos.y);
-		buffer.rotate(this.vel.heading());
-
-		// Glüheffekt
-		for (let i = 3; i > 0; i--) {
-			buffer.fill(this.hue, 80, 100, 0.3 / i);
-			this.drawParticleShape(this.r * i * intensity);
-		}
-
-		buffer.fill(this.hue, 80, 100, 0.8);
-		this.drawParticleShape(this.r);
-
-		buffer.pop();
-	}
-
-	drawParticleShape(size) {
-		buffer.beginShape();
-		buffer.vertex(-size, -size / 2);
-		buffer.vertex(-size, size / 2);
-		buffer.vertex(size, 0);
-		buffer.endShape(CLOSE);
-	}
-
-	applyForce(force) {
-		this.acc.add(force);
 	}
 }
 
