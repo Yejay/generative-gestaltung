@@ -15,7 +15,9 @@ const WORDS = ['DREAM', 'MAGIC', 'CHAOS', 'SPACE', 'FUCK'];
 function preload() {
 	font = loadFont(
 		'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf'
-	);
+	)
+    attractCursor = loadImage('https://img.icons8.com/?size=100&id=EDlqOuNnwBFU&format=png&color=000000');
+    repelCursor = loadImage('https://img.icons8.com/?size=100&id=8Cpx9JrEbpOM&format=png&color=000000');
 }
 
 function setup() {
@@ -194,17 +196,14 @@ function updateMainParticles(intensity) {
 
 function drawForceIndicator() {
 	noCursor();
-	if (forceActive) {
-		noFill();
-		strokeWeight(2);
-		if (attractMode) {
-			stroke(120, 100, 100);
-			ellipse(mouseX, mouseY, 30);
-		} else {
-			stroke(0, 100, 100);
-			ellipse(mouseX, mouseY, 30);
-		}
-	}
+    if (forceActive) {
+        // Choose the cursor image based on attractMode
+        let cursorImage = attractMode ? attractCursor : repelCursor;
+
+        // Draw the cursor image at the mouse position
+        imageMode(CENTER);
+        image(cursorImage, mouseX, mouseY, 40, 40); // Adjust size if necessary
+    }
 }
 
 function keyPressed() {
