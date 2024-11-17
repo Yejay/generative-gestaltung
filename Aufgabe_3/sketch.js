@@ -51,7 +51,7 @@ function initEffects() {
 	}));
 
 	// Kometen initialisieren
-	for (let i = 0; i < 3; i++) {
+	for (let i = 0; i < 10; i++) {
 		createNewComet();
 	}
 }
@@ -106,7 +106,7 @@ function draw() {
 
     // Draws all visual elements in order
     drawNebulae(1);
-    drawStars(1);
+    drawStars();
     updateAndDrawComets();
     updateMainParticles(1);
     drawForceIndicator();
