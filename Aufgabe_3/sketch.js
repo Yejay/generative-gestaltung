@@ -3,7 +3,6 @@ let stars = [];
 let comets = [];
 let vehicles = [];
 let targetPoints = [];
-let time = 0;
 let wordIndex = 0;
 let attractMode = true;
 let forceActive = false;
@@ -15,17 +14,19 @@ const WORDS = ['DREAM', 'MAGIC', 'CHAOS', 'SPACE', 'FUCK'];
 function preload() {
 	font = loadFont(
 		'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf'
-	)
-    attractCursor = loadImage('https://img.icons8.com/?size=100&id=EDlqOuNnwBFU&format=png&color=000000');
-    repelCursor = loadImage('https://img.icons8.com/?size=100&id=8Cpx9JrEbpOM&format=png&color=000000');
+	);
+	attractCursor = loadImage(
+		'https://img.icons8.com/?size=100&id=EDlqOuNnwBFU&format=png&color=000000'
+	);
+	repelCursor = loadImage(
+		'https://img.icons8.com/?size=100&id=8Cpx9JrEbpOM&format=png&color=000000'
+	);
 }
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
 	pixelDensity(1);
 	colorMode(HSB, 360, 100, 100, 1.0);
-
-	// Initialize other components
 	initEffects();
 	generateTextPoints(WORDS[wordIndex]);
 }
@@ -68,142 +69,123 @@ function createNewComet() {
 }
 
 function generateTextPoints(text) {
-    // Resets arrays for new text
-    vehicles = [];
-    targetPoints = [];
+	vehicles = [];
+	targetPoints = [];
 
-    // Adjusts font size based on text length
-    let fontSize = text.length > 4 ? 120 : 150;
-    
-    // Calculates text boundaries for centering
-    let bounds = font.textBounds(text, 0, 0, fontSize);
-    let centerX = width / 2 - bounds.w / 2;
-    let centerY = height / 2 + bounds.h / 2;
+	// Adjusts font size based on text length
+	let fontSize = text.length > 4 ? 120 : 150;
 
-    // Converts text to points using p5.js font functions
-    let points = font.textToPoints(text, centerX, centerY, fontSize, {
-        sampleFactor: 0.1,  // Controls point density
-        simplifyThreshold: 0
-    });
+	// Calculates text boundaries for centering
+	let bounds = font.textBounds(text, 0, 0, fontSize);
+	let centerX = width / 2 - bounds.w / 2;
+	let centerY = height / 2 + bounds.h / 2;
 
-    // Creates vehicles (particles) for each point
-    for (let p of points) {
-        // Each vehicle starts at random position but has fixed target
-        let vehicle = new Vehicle(
-            random(width),
-            random(height),
-            p.x,
-            p.y
-        );
-        vehicles.push(vehicle);
-        targetPoints.push(createVector(p.x, p.y));
-    }
+	let points = font.textToPoints(text, centerX, centerY, fontSize, {
+		sampleFactor: 0.1,
+		simplifyThreshold: 0,
+	});
+
+	for (let p of points) {
+		let vehicle = new Vehicle(random(width), random(height), p.x, p.y);
+		vehicles.push(vehicle);
+		targetPoints.push(createVector(p.x, p.y));
+	}
 }
 
 function draw() {
-    // Main animation loop that runs continuously
-    background(240, 30, 15);  // Sets dark background
+	background(240, 30, 15);
 
-    // Draws all visual elements in order
-    drawNebulae(1);
-    drawStars();
-    updateAndDrawComets();
-    updateMainParticles(1);
-    drawForceIndicator();
+	drawNebulae(1);
+	drawStars();
+	updateAndDrawComets();
+	updateMainParticles(1);
+	drawForceIndicator();
 
-    time += 0.01;  // Updates global time variable
-
-    // Shows FPS counter
-    showFps();
+	showFps();
 }
 
 function drawNebulae() {
-    // Creates cloud-like shapes using Perlin noise
-    noStroke();
+	noStroke();
 
-    for (let nebula of nebulae) {
-        push();  // Saves current drawing state
-        translate(nebula.x, nebula.y);  // Moves drawing origin to nebula center
-        fill(nebula.hue, 60, 80, nebula.alpha);
+	for (let nebula of nebulae) {
+		push();
+		translate(nebula.x, nebula.y);
+		fill(nebula.hue, 60, 80, nebula.alpha);
 
-        // Creates organic shape using vertices in a circle
-        beginShape();
-        for (let a = 0; a < TWO_PI; a += 0.5) {
-            // Uses Perlin noise to create irregular radius
-            let r = nebula.size * noise(cos(a) + nebula.offset, sin(a) + nebula.offset);
-            let x = r * cos(a);
-            let y = r * sin(a);
-            vertex(x, y);
-        }
-        endShape(CLOSE);
+		beginShape();
+		for (let a = 0; a < TWO_PI; a += 0.5) {
+			// Uses Perlin noise to create irregular radius
+			let r =
+				nebula.size * noise(cos(a) + nebula.offset, sin(a) + nebula.offset);
+			let x = r * cos(a);
+			let y = r * sin(a);
+			vertex(x, y);
+		}
+		endShape(CLOSE);
 
-        pop();  // Restores drawing state
-    }
+		pop();
+	}
 }
 
 function drawStars() {
-    // Draws simple white dots (stars) at random fixed positions
-    noStroke();
-    fill(0, 0, 100, 0.8);  // White color with 80% opacity
+	noStroke();
+	fill(0, 0, 100, 0.8);
 
-    for (let star of stars) {
-        ellipse(star.x, star.y, 2);
-    }
+	for (let star of stars) {
+		ellipse(star.x, star.y, 2);
+	}
 }
 
 function updateAndDrawComets() {
-    for (let comet of comets) {
-        // Updates comet position based on its velocity
-        comet.pos.add(comet.vel);
+	for (let comet of comets) {
+		// Updates comet position based on its velocity
+		comet.pos.add(comet.vel);
 
-        // Draws the comet's tail using 3 gradually fading circles
-        for (let i = 3; i > 0; i--) {
-            let alpha = 0.3 / i;  // Decreasing opacity for tail effect
-            fill(comet.hue, 80, 100, alpha);
-            ellipse(
-                comet.pos.x - comet.vel.x * i * 2,  // Position offset based on velocity
-                comet.pos.y - comet.vel.y * i * 2,
-                8
-            );
-        }
+		// Draws the comet's tail using 3 gradually fading circles
+		for (let i = 3; i > 0; i--) {
+			let alpha = 0.3 / i;
+			fill(comet.hue, 80, 100, alpha);
+			ellipse(
+				comet.pos.x - comet.vel.x * i * 2,
+				comet.pos.y - comet.vel.y * i * 2,
+				8
+			);
+		}
 
-        // Draws the comet's head
-        fill(comet.hue, 80, 100);
-        ellipse(comet.pos.x, comet.pos.y, 6);
+		fill(comet.hue, 80, 100);
+		ellipse(comet.pos.x, comet.pos.y, 6);
 
-        // Marks comets as dead if they move off-screen
-        if (comet.pos.x < 0 || comet.pos.x > width ||
-            comet.pos.y < 0 || comet.pos.y > height) {
-            comet.alive = false;
-        }
-    }
+		if (
+			comet.pos.x < 0 ||
+			comet.pos.x > width ||
+			comet.pos.y < 0 ||
+			comet.pos.y > height
+		) {
+			comet.alive = false;
+		}
+	}
 
-    // Maintains exactly 3 comets by removing dead ones and creating new ones
-    comets = comets.filter((c) => c.alive);
-    while (comets.length < 3) {
-        createNewComet();
-    }
+	comets = comets.filter((c) => c.alive);
+	while (comets.length < 3) {
+		createNewComet();
+	}
 }
 
 function updateMainParticles(intensity) {
-    // Iterates through all vehicle objects (text particles)
-    for (let vehicle of vehicles) {
-        vehicle.move(intensity);    // Calculates new position based on forces
-        vehicle.update();          // Updates the position
-        vehicle.show(intensity);   // Renders the particle on screen
-    }
+	for (let vehicle of vehicles) {
+		vehicle.move(intensity);
+		vehicle.update();
+		vehicle.show(intensity);
+	}
 }
 
 function drawForceIndicator() {
 	noCursor();
-    if (forceActive) {
-        // Choose the cursor image based on attractMode
-        let cursorImage = attractMode ? attractCursor : repelCursor;
-
-        // Draw the cursor image at the mouse position
-        imageMode(CENTER);
-        image(cursorImage, mouseX, mouseY, 40, 40); // Adjust size if necessary
-    }
+	if (forceActive) {
+		let cursorImage = attractMode ? attractCursor : repelCursor;
+		imageMode(CENTER);
+		image(cursorImage, mouseX, mouseY, 40, 40);
+	}
 }
 
 function keyPressed() {
@@ -211,17 +193,17 @@ function keyPressed() {
 		wordIndex = (wordIndex + 1) % WORDS.length;
 		generateTextPoints(WORDS[wordIndex]);
 	}
-    if (key === 'f') {
-        showFpsCounter = !showFpsCounter;
-    }
+	if (key === 'f') {
+		showFpsCounter = !showFpsCounter;
+	}
 }
 
 function showFps() {
-    if (showFpsCounter) {
-        fill(0, 0, 100);
-        noStroke();
-        text('FPS: ' + floor(frameRate()), 10, 20);
-    }
+	if (showFpsCounter) {
+		fill(0, 0, 100);
+		noStroke();
+		text('FPS: ' + floor(frameRate()), 10, 20);
+	}
 }
 
 function mousePressed() {
