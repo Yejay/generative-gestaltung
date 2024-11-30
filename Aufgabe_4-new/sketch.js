@@ -7,7 +7,9 @@ let cityscape;
 let explosionSounds = [];
 
 function preload() {
-    textFont = loadFont('https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf');
+	textFont = loadFont(
+		'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf'
+	);
 	// Load all explosion sounds
 	for (let explosionURL of CONFIG.SOUNDS.EXPLOSION) {
 		let sound = loadSound(explosionURL);
@@ -67,8 +69,9 @@ function mousePressed() {
 }
 
 function launchFirework(x, y) {
-    let type = random(CONFIG.FIREWORK_TYPES);
-    fireworks.push(new Firework(x, y, type));
+	x = constrain(x, width * 0.1, width * 0.9);
+	let type = random(CONFIG.FIREWORK_TYPES);
+	fireworks.push(new Firework(x, y, type));
 }
 
 function toggleAuto() {

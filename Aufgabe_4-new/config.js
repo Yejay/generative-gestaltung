@@ -23,8 +23,8 @@ const CONFIG = {
         LIFESPAN_DECREASE: 4,
         VELOCITY_RETAIN: 0.95,
         LAUNCH_VELOCITY: {
-            MIN: 8,
-            MAX: 12
+            MIN: 12,
+            MAX: 16
         }
     }
 };
