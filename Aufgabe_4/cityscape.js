@@ -1,26 +1,3 @@
-// function createCityscape() {
-//     const img = createGraphics(width, height/3);
-//     img.fill(20);
-//     img.noStroke();
-    
-//     // Create random buildings
-//     for (let x = 0; x < width; x += random(30, 80)) {
-//         const h = random(20, img.height);
-//         img.rect(x, img.height - h, random(20, 60), h);
-        
-//         // Add windows
-//         for (let y = img.height - h + 10; y < img.height - 10; y += 15) {
-//             if (random() < 0.7) {
-//                 img.fill(255, 255, 0, random(50, 150));
-//                 img.rect(x + 5, y, 10, 10);
-//                 img.fill(20);
-//             }
-//         }
-//     }
-    
-//     return img;
-// }
-
 let buildings = [];
 
 function createCityscape() {

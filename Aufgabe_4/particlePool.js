@@ -4,27 +4,27 @@ class ParticlePool {
         this.pool = new Array(maxSize).fill(null);
         this.nextAvailable = 0;
         
-        // Vorfüllen des Pools
+        // prefill particle pool
         for (let i = 0; i < maxSize; i++) {
             this.pool[i] = new Particle(0, 0, 0, false);
         }
     }
 
     acquire(x, y, hu, firework, type) {
-        // Wenn Pool leer, erstelle neuen Partikel
+        // create new particle if pool is exhausted
         if (this.nextAvailable >= this.maxSize) {
             console.warn('Pool erschöpft - erstelle neuen Partikel');
             return new Particle(x, y, hu, firework, type);
         }
 
-        // Nimm Partikel aus Pool und initialisiere ihn neu
+        // take particle from pool and initialize it
         const particle = this.pool[this.nextAvailable++];
         particle.reset(x, y, hu, firework, type);
         return particle;
     }
 
     release(particle) {
-        // Gebe Partikel zurück in den Pool
+        // put particle back into pool
         if (this.nextAvailable <= 0) return;
         
         this.nextAvailable--;
