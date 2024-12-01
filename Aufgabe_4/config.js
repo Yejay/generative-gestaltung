@@ -1,7 +1,15 @@
 const CONFIG = {
     PARTICLE_COUNT: 100,
     STAR_COUNT: 200,
-    FIREWORK_TYPES: ['circle', 'heart', 'spiral', 'text', 'steeringText'],
+    // FIREWORK_TYPES: ['circle', 'heart', 'spiral', 'text', 'steeringText'],
+	FIREWORK_TYPES: [
+		'circle', 
+		'heart', 
+		'spiral', 
+		'text', 
+		'steeringText', 
+		// 'double'
+	],
     COLORS: {
         BACKGROUND: [5, 5, 20],
         STARS: [255, 255, 255]
@@ -24,7 +32,7 @@ const CONFIG = {
         VELOCITY_RETAIN: 0.95,
         LAUNCH_VELOCITY: {
             MIN: 12,
-            MAX: 16
+            MAX: 20
         }
     }
 };

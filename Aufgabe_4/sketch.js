@@ -92,3 +92,4 @@ function windowResized() {
 	resizeCanvas(windowWidth, windowHeight);
 	cityscape = createCityscape();
 }
+
