@@ -1,5 +1,9 @@
 class Particle {
     constructor(x, y, hu, firework, type = 'circle') {
+        this.reset(x, y, hu, firework, type);
+    }
+    
+    reset(x, y, hu, firework, type = 'circle') {
         this.pos = createVector(x, y);
         this.firework = firework;
         this.lifespan = 255;
@@ -17,6 +21,7 @@ class Particle {
             this.vel = p5.Vector.random2D();
             this.vel.mult(random(2, 10));
         }
+        return this;
     }
     
     applyForce(force) {
@@ -95,7 +100,7 @@ class Particle {
     }
     
     drawText() {
-        textSize(12);
+        textSize(40);
         textAlign(CENTER, CENTER);
         text(random(CONFIG.TEXTS), this.pos.x, this.pos.y);
     }

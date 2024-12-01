@@ -1,57 +1,56 @@
 class Firework {
 	constructor(x, y, type = random(CONFIG.FIREWORK_TYPES)) {
+        // Initialisiere Pool wenn noch nicht vorhanden
+        if (!particlePool) {
+            particlePool = new ParticlePool(2000); // Poolgröße anpassbar
+        }
+        
         this.type = type;
         this.hu = random(255);
-        // Constrain initial x position
         x = constrain(x, width * 0.1, width * 0.9);
-        this.firework = new Particle(x, y, this.hu, true, type);
+        this.firework = particlePool.acquire(x, y, this.hu, true, type);
         this.exploded = false;
         this.particles = [];
     }
 
 	explode() {
-		// Pick a random explosion sound
-		const explosionIndex = floor(random(explosionSounds.length));
-		explosionSounds[explosionIndex].play();
+        const explosionIndex = floor(random(explosionSounds.length));
+        explosionSounds[explosionIndex].play();
 
-		if (this.type === 'steeringText') {
-			let points = this.createTextPoints();
-			console.log('Generated points:', points.length);
-
-			// Only create steering particles if we have points
-			if (points.length > 0) {
-				for (let point of points) {
-					const p = new SteeringParticle(
-						this.firework.pos.x,
-						this.firework.pos.y,
-						point.x,
-						point.y,
-						this.hu
-					);
-					this.particles.push(p);
-				}
-			} else {
-				// Fallback to normal particles if no points generated
-				this.createNormalParticles();
-			}
-		} else {
-			this.createNormalParticles();
-		}
-	}
+        if (this.type === 'steeringText') {
+            let points = this.createTextPoints();
+            if (points.length > 0) {
+                for (let point of points) {
+                    const p = new SteeringParticle(
+                        this.firework.pos.x,
+                        this.firework.pos.y,
+                        point.x,
+                        point.y,
+                        this.hu
+                    );
+                    this.particles.push(p);
+                }
+            } else {
+                this.createNormalParticles();
+            }
+        } else {
+            this.createNormalParticles();
+        }
+    }
 
 	createNormalParticles() {
-		const particleCount = this.type === 'text' ? 50 : CONFIG.PARTICLE_COUNT;
-		for (let i = 0; i < particleCount; i++) {
-			const p = new Particle(
-				this.firework.pos.x,
-				this.firework.pos.y,
-				this.hu,
-				false,
-				this.type
-			);
-			this.particles.push(p);
-		}
-	}
+        const particleCount = this.type === 'text' ? 50 : CONFIG.PARTICLE_COUNT;
+        for (let i = 0; i < particleCount; i++) {
+            const p = particlePool.acquire(
+                this.firework.pos.x,
+                this.firework.pos.y,
+                this.hu,
+                false,
+                this.type
+            );
+            this.particles.push(p);
+        }
+    }
 
 	createTextPoints() {
 		let points = [];
@@ -87,8 +86,17 @@ class Firework {
 	}
 
 	done() {
-		return this.exploded && this.particles.length === 0;
-	}
+        if (this.exploded) {
+            // Gebe alle toten Partikel zurück in den Pool
+            for (let i = this.particles.length - 1; i >= 0; i--) {
+                if (this.particles[i].done()) {
+                    particlePool.release(this.particles[i]);
+                    this.particles.splice(i, 1);
+                }
+            }
+        }
+        return this.exploded && this.particles.length === 0;
+    }
 
 	// update() {
 	// 	if (!this.exploded) {

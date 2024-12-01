@@ -5,6 +5,7 @@ let autoLaunch = true;
 let soundEnabled = false;
 let cityscape;
 let explosionSounds = [];
+let particlePool;
 
 function preload() {
 	textFont = loadFont(
@@ -22,6 +23,7 @@ function setup() {
 	createCanvas(windowWidth, windowHeight);
 	colorMode(HSB);
 	gravity = createVector(0, 0.2);
+	particlePool = new ParticlePool(2000);
 
 	// Initialize stars
 	for (let i = 0; i < CONFIG.STAR_COUNT; i++) {
