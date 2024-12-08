@@ -9,6 +9,8 @@ class Fish {
         this.isShark = isShark;
         this.health = 100;
         this.image = isShark ? predatorImages[0] : preyImages[0]; // Image for visualization
+        this.tailAngle = 0;
+        this.tailSpeed = 0.1;
     }
 
     update(fishes, jellyfishes) {
@@ -37,13 +39,24 @@ class Fish {
         translate(this.pos.x, this.pos.y);
         rotate(this.vel.heading());
     
+        // Tail animation
+        this.tailAngle = sin(frameCount * this.tailSpeed) * 0.3;
+    
         if (this.image) {
             if (isNightMode) {
                 drawingContext.shadowBlur = 15;
                 drawingContext.shadowColor = this.isShark ? 'red' : 'blue';
             }
+            
+            // Draw body
             imageMode(CENTER);
             image(this.image, 0, 0, this.r * 2, this.r * 2);
+            
+            // Draw animated tail
+            push();
+            rotate(this.tailAngle);
+            // Draw tail implementation
+            pop();
         }
         pop();
     
@@ -238,4 +251,34 @@ class Fish {
             this.bloodSystem.draw();
         }
     }    
+
+    flee(predators) {
+        let escape = createVector(0, 0);
+        let count = 0;
+        
+        for (let predator of predators) {
+            if (!predator.isShark) continue;
+            
+            let d = p5.Vector.dist(this.pos, predator.pos);
+            if (d < CONFIG.FISH.PREY_PERCEPTION) {
+                let diff = p5.Vector.sub(this.pos, predator.pos);
+                diff.normalize();
+                diff.div(d); // Closer predators have stronger influence
+                escape.add(diff);
+                count++;
+                
+                // Burst of speed when very close to predator
+                if (d < CONFIG.FISH.PREY_PERCEPTION * 0.3) {
+                    this.maxSpeed *= 1.5;
+                }
+            }
+        }
+        
+        if (count > 0) {
+            escape.div(count);
+            escape.setMag(this.maxSpeed);
+            return escape;
+        }
+        return createVector(0, 0);
+    }
 }

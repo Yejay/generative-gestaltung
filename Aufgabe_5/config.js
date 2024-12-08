@@ -26,5 +26,10 @@ const CONFIG = {
         DAY_COLOR: [200, 220, 255],
         PLANKTON_DENSITY: 50,
         BUBBLE_RATE: 0.1
+    },
+    SHARK: {
+        MAX_STAMINA: 100,
+        STAMINA_RECOVERY_RATE: 0.2,
+        SPRINT_COST: 1
     }
 };

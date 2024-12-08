@@ -6,6 +6,8 @@ let jellyfishes = [];
 let separationWeight = 1.5;
 let alignmentWeight = 1.0;
 let cohesionWeight = 1.0;
+const GRID_SIZE = 50;
+let spatialGrid = {};
 
 if (typeof CONFIG === 'undefined') {
     console.error('CONFIG is not defined! Make sure constants.js is loaded first.');
@@ -162,5 +164,16 @@ function keyPressed() {
         case 'j': addJellyfish(); break;
         case 'n': toggleNightMode(); break;
         case 'r': resetSimulation(); break;
+    }
+}
+
+function updateSpatialGrid() {
+    spatialGrid = {};
+    for (let f of fish) {
+        let gridX = floor(f.pos.x / GRID_SIZE);
+        let gridY = floor(f.pos.y / GRID_SIZE);
+        let key = `${gridX},${gridY}`;
+        if (!spatialGrid[key]) spatialGrid[key] = [];
+        spatialGrid[key].push(f);
     }
 }
