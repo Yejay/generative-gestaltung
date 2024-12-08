@@ -25,7 +25,7 @@ const CONFIG = {
         NIGHT_COLOR: [10, 20, 40],
         DAY_COLOR: [200, 220, 255],
         PLANKTON_DENSITY: 50,
-        BUBBLE_RATE: 0.1
+        BUBBLE_RATE: 0.05
     },
     SHARK: {
         MAX_STAMINA: 100,

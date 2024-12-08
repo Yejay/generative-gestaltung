@@ -1,5 +1,5 @@
 let environment;
-let soundManager;
+// let soundManager;
 let ui;
 let fish = [];
 let jellyfishes = [];
@@ -8,14 +8,15 @@ let alignmentWeight = 1.0;
 let cohesionWeight = 1.0;
 const GRID_SIZE = 50;
 let spatialGrid = {};
+let nightMode = false;
 
 if (typeof CONFIG === 'undefined') {
     console.error('CONFIG is not defined! Make sure constants.js is loaded first.');
 }
 
 function preload() {
-    soundManager = new SoundManager();
-    soundManager.preload();
+    // soundManager = new SoundManager();
+    // soundManager.preload();
     predatorImages = [
         loadImage('https://img.icons8.com/?size=100&id=dNyJV4Qw3AEk&format=png&color=000000'),
     ]
@@ -30,7 +31,7 @@ function preload() {
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    environment = new Environment();
+    // environment = new Environment();
 
     ui = new UI({
         onSeparationWeightChange: value => separationWeight = value,
@@ -65,10 +66,11 @@ function initializeSimulation() {
 
 function draw() {
     try {
-        let bgColor = environment.nightMode ? color(20, 30, 50) : color(40, 100, 150);
+        // Set background based on night mode
+        let bgColor = nightMode ? color(20, 30, 50) : color(40, 100, 150);
         background(bgColor);
 
-        environment.draw();
+        // environment.draw();
 
         // Draw jellyfishes
         jellyfishes.forEach((jelly, index) => {
@@ -76,7 +78,7 @@ function draw() {
                 console.error(`Jellyfish at index ${index} is invalid:`, jelly);
             } else {
                 jelly.update();
-                jelly.draw(environment.nightMode);
+                jelly.draw(nightMode);
             }
         });
 
@@ -86,7 +88,7 @@ function draw() {
                 console.error(`Fish at index ${index} is invalid:`, f);
             } else {
                 f.update(fish, jellyfishes);
-                f.draw(environment.nightMode);
+                f.draw(nightMode);
             }
         });
 
@@ -138,7 +140,7 @@ function addJellyfish() {
 }
 
 function toggleNightMode() {
-    environment.nightMode = !environment.nightMode;
+    nightMode = !nightMode;
 }
 
 function resetSimulation() {
