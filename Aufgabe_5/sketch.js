@@ -12,7 +12,7 @@ function preload() {
     soundManager = new SoundManager();
     soundManager.preload();
     predatorImages = [
-        loadImage('https://img.icons8.com/?size=100&id=Mu5PQGY9pIVj&format=png&color=000000'),
+        loadImage('https://img.icons8.com/?size=100&id=dNyJV4Qw3AEk&format=png&color=000000'),
     ]
     preyImages = [
         loadImage('https://img.icons8.com/?size=100&id=ridRyeBSIgrH&format=png&color=000000'),
