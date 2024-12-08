@@ -1,0 +1,58 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: white;
+}
+
+canvas {
+    border: 2px solid black;
+    z-index: 10;
+}
+
+.slider-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.slider-container input {
+    width: 120px;
+}
+
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.control-panel {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    color: white; /* Add this */
+}
+
+.stat {
+    color: white; /* Add this */
+    margin: 5px 0;
+}
+
+/* Tooltip styles */
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+}
