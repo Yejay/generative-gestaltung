@@ -68,19 +68,23 @@ class Environment {
                 size: random(2, 8),
                 speed: random(1, 3)
             });
+            console.log("Bubble created"); // Debug log
         }
-
+    
         for (let i = this.bubbles.length - 1; i >= 0; i--) {
             let bubble = this.bubbles[i];
             bubble.y -= bubble.speed;
             bubble.x += sin(frameCount * 0.1 + bubble.y * 0.1) * 0.5;
-            if (bubble.y < 0) this.bubbles.splice(i, 1);
+            if (bubble.y < 0) {
+                this.bubbles.splice(i, 1);
+                console.log("Bubble removed"); // Debug log
+            }
         }
     }
 
     drawBubbles() {
         noStroke();
-        fill(200, 20, 100, 0.5);
+        fill(255, 255, 255, 0.8); // Bright white bubbles
         this.bubbles.forEach(bubble => {
             ellipse(bubble.x, bubble.y, bubble.size);
         });
@@ -95,10 +99,10 @@ class Environment {
             });
         }
     }
-
+    
     drawPlankton() {
         noStroke();
-        fill(60, 70, 100, this.nightMode ? 0.5 : 0.3);
+        fill(50, 200, 50, this.nightMode ? 0.7 : 0.4); // Bright green plankton
         this.plankton.forEach(p => {
             let flicker = random(0.8, 1.2);
             ellipse(p.x, p.y, p.size * flicker);

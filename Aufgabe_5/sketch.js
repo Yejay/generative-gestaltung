@@ -3,6 +3,9 @@ let soundManager;
 let ui;
 let fish = [];
 let jellyfishes = [];
+let separationWeight = 1.5;
+let alignmentWeight = 1.0;
+let cohesionWeight = 1.0;
 
 if (typeof CONFIG === 'undefined') {
     console.error('CONFIG is not defined! Make sure constants.js is loaded first.');
@@ -18,7 +21,7 @@ function preload() {
         loadImage('https://img.icons8.com/?size=100&id=ridRyeBSIgrH&format=png&color=000000'),
     ]
     jellyfishImages = [
-        loadImage('https://img.icons8.com/?size=100&id=9uU0ujsukNR5&format=png&color=000000'),
+        loadImage('https://img.icons8.com/?size=100&id=ywdnn5QiqsYg&format=png&color=000000'),
     ]
 }
 
@@ -26,19 +29,19 @@ function preload() {
 function setup() {
     createCanvas(windowWidth, windowHeight);
     environment = new Environment();
-    console.log(environment);
+
     ui = new UI({
-        onFishSpeedChange: updateFishSpeed,
-        onSharkSpeedChange: updateSharkSpeed,
-        onVolumeChange: (vol) => soundManager.setVolume(vol),
+        onSeparationWeightChange: value => separationWeight = value,
+        onAlignmentWeightChange: value => alignmentWeight = value,
+        onCohesionWeightChange: value => cohesionWeight = value,
         onAddFish: () => addNewFish(false),
         onAddShark: () => addNewFish(true),
         onAddJellyfish: addJellyfish,
         onNightModeToggle: toggleNightMode,
         onReset: resetSimulation
     });
+
     initializeSimulation();
-    soundManager.startAmbient();
 }
 
 function initializeSimulation() {
@@ -106,23 +109,16 @@ function addNewFish(isShark) {
     soundManager.playSound('splash');
 }
 
-function updateFishSpeeds() {
+function updateFishSpeed(value) {
+    console.log("Fish speed slider value:", value); // Debugging
     fish.forEach(f => {
-        if (f.isShark) {
-            f.maxSpeed = CONFIG.FISH.DEFAULT_SHARK_SPEED;
-        } else {
-            f.maxSpeed = CONFIG.FISH.DEFAULT_PREY_SPEED;
+        if (!f.isShark) {
+            f.maxSpeed = value; // Update speed for non-sharks
+            console.log("Updated fish maxSpeed:", f.maxSpeed); // Debugging
         }
     });
 }
 
-function updateFishSpeed(value) {
-    fish.forEach(f => {
-        if (!f.isShark) {
-            f.maxSpeed = value;
-        }
-    });
-}
 
 function updateSharkSpeed(value) {
     fish.forEach(f => {

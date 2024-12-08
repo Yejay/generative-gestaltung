@@ -12,11 +12,20 @@ canvas {
 
 .slider-container {
     position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: rgba(255, 255, 255, 0.8);
+    bottom: 20px; /* Align at the bottom */
+    left: 20px; /* Align at the left */
+    display: flex; /* Display sliders horizontally */
+    gap: 15px; /* Add spacing between sliders */
+    background: rgba(255, 255, 255, 0.8); /* Light background */
     padding: 10px;
     border-radius: 5px;
+    z-index: 1000;
+}
+
+.slider-container .slider-wrapper {
+    display: flex;
+    flex-direction: column; /* Align label and slider vertically */
+    align-items: center; /* Center-align the slider and label */
 }
 
 .slider-container input {

@@ -34,6 +34,7 @@ class Jellyfish {
         }
 
         // Draw the image scaled to the size
+        tint(255, 10, 80); 
         imageMode(CENTER);
         image(this.image, 0, 0, this.size, this.size);
 

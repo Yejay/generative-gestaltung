@@ -7,56 +7,60 @@ class UI {
 
     setupUI() {
         let panel = createDiv('');
-        panel.class('control-panel');
-
-        // Stats container
+        panel.class('control-panel'); // For top-left stats/buttons
         this.statsDiv = createDiv('');
         this.statsDiv.class('stats');
         this.statsDiv.parent(panel);
-
-        // Controls container
-        let controlsDiv = createDiv('');
-        controlsDiv.class('controls');
-        controlsDiv.parent(panel);
-
-        // Sliders
-        this.createSlider(controlsDiv, 'Fish Speed', 1, 5, 2, 0.1, 
-            value => this.callbacks.onFishSpeedChange(value));
-        this.createSlider(controlsDiv, 'Shark Speed', 1, 5, 3, 0.1,
-            value => this.callbacks.onSharkSpeedChange(value));
-        this.createSlider(controlsDiv, 'Volume', 0, 1, 0.5, 0.1,
-            value => this.callbacks.onVolumeChange(value));
-
-        // Buttons container
+    
+        // Slider container for bottom-left sliders
+        let sliderContainer = createDiv('');
+        sliderContainer.class('slider-container'); // Bottom-left sliders
+        this.createSlider(sliderContainer, 'Separation Weight', 0, 3, 1.5, 0.1,
+            value => this.callbacks.onSeparationWeightChange(value));
+        this.createSlider(sliderContainer, 'Alignment Weight', 0, 3, 1.0, 0.1,
+            value => this.callbacks.onAlignmentWeightChange(value));
+        this.createSlider(sliderContainer, 'Cohesion Weight', 0, 3, 1.0, 0.1,
+            value => this.callbacks.onCohesionWeightChange(value));
+    
+        // Buttons container remains in top-left
         let buttonDiv = createDiv('');
         buttonDiv.class('button-container');
-        buttonDiv.parent(controlsDiv);
-
+        buttonDiv.parent(panel);
+    
         // Create buttons
         this.createButton(buttonDiv, '🐟 Add Fish', () => this.callbacks.onAddFish());
         this.createButton(buttonDiv, '🦈 Add Shark', () => this.callbacks.onAddShark());
         this.createButton(buttonDiv, '🎐 Add Jellyfish', () => this.callbacks.onAddJellyfish());
         this.createButton(buttonDiv, '🌙 Toggle Night Mode', () => this.callbacks.onNightModeToggle());
         this.createButton(buttonDiv, '🔄 Reset', () => this.callbacks.onReset());
-
+    
         return panel;
     }
+    
+    
 
     createSlider(parent, label, min, max, value, step, callback) {
-        let container = createDiv('');
-        container.class('slider-container');
-        container.parent(parent);
-
-        createSpan(label).parent(container);
-        
+        let wrapper = createDiv('');
+        wrapper.class('slider-wrapper');
+        wrapper.parent(parent);
+    
+        // Add label
+        createSpan(label).parent(wrapper);
+    
+        // Create slider
         let slider = createSlider(min, max, value, step);
-        slider.input(() => callback(slider.value()));
-        slider.parent(container);
-        
+        slider.input(() => {
+            console.log(`${label} slider changed to:`, slider.value()); // Add this for debugging
+            callback(slider.value());
+        });
+        slider.parent(wrapper);
+    
+        // Add value display
         let valueDisplay = createSpan(value.toFixed(1));
-        valueDisplay.parent(container);
+        valueDisplay.parent(wrapper);
         slider.input(() => valueDisplay.html(slider.value().toFixed(1)));
     }
+    
 
     createButton(parent, label, callback) {
         let btn = createButton(label);
