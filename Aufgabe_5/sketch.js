@@ -15,7 +15,7 @@ function preload() {
         loadImage('https://img.icons8.com/?size=100&id=Mu5PQGY9pIVj&format=png&color=000000'),
     ]
     preyImages = [
-        loadImage('https://img.icons8.com/?size=100&id=auwdXB1aqqSO&format=png&color=000000'),
+        loadImage('https://img.icons8.com/?size=100&id=ridRyeBSIgrH&format=png&color=000000'),
     ]
     jellyfishImages = [
         loadImage('https://img.icons8.com/?size=100&id=9uU0ujsukNR5&format=png&color=000000'),
@@ -161,7 +161,7 @@ function mousePressed() {
 
 function keyPressed() {
     switch (key) {
-        case ' ': addNewFish(false); break;
+        case 'f': addNewFish(false); break;
         case 's': addNewFish(true); break;
         case 'j': addJellyfish(); break;
         case 'n': toggleNightMode(); break;

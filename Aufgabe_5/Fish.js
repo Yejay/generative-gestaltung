@@ -227,13 +227,10 @@ class Fish {
         rotate(this.vel.heading());
 
         if (this.image) {
-            // Glow in night mode
             if (isNightMode) {
                 drawingContext.shadowBlur = 15;
                 drawingContext.shadowColor = this.isShark ? 'red' : 'blue';
             }
-
-            // Draw predator image
             imageMode(CENTER);
             image(this.image, 0, 0, this.r * 2, this.r * 2);
         }
