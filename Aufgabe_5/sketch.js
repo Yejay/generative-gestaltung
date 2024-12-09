@@ -14,7 +14,12 @@ if (typeof CONFIG === 'undefined') {
 
 function preload() {
 	backgroundVideo = createVideo(
-		'https://cdn.pixabay.com/video/2020/04/30/37712-414754673_large.mp4'
+		// 'https://cdn.pixabay.com/video/2020/04/30/37712-414754673_large.mp4'
+        'https://cdn.pixabay.com/video/2022/06/21/121463-724697477_large.mp4'
+        // 'https://cdn.pixabay.com/video/2021/07/28/83061-581386110_large.mp4'
+        // 'https://cdn.pixabay.com/video/2023/04/23/160210-820383082_large.mp4'
+        // 'https://cdn.pixabay.com/video/2022/11/08/138218-768820241_large.mp4'
+        // 'https://cdn.pixabay.com/video/2022/06/21/121613-724710344_large.mp4'
 	);
 	backgroundVideo.hide(); // Hide the original HTML element
 	// Add an event listener to play the video when it's loaded
@@ -36,7 +41,8 @@ function preload() {
 	];
 	jellyfishImages = [
 		loadImage(
-			'https://img.icons8.com/?size=100&id=ywdnn5QiqsYg&format=png&color=000000'
+			// 'https://img.icons8.com/?size=100&id=ywdnn5QiqsYg&format=png&color=000000'
+            'https://img.icons8.com/?size=100&id=YUXV7WxntwIX&format=png&color=000000'
 		),
 	];
 }
@@ -81,7 +87,6 @@ function initializeSimulation() {
 function draw() {
 	try {
 		image(backgroundVideo, 0, 0, width, height);
-
 		// Draw jellyfishes
 		jellyfishes.forEach((jelly, index) => {
 			if (!jelly || typeof jelly.draw !== 'function') {

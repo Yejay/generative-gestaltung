@@ -3,16 +3,16 @@ class Fish {
 		this.pos = createVector(random(width), random(height));
 		this.vel = p5.Vector.random2D();
 		this.acc = createVector();
-		this.r = isShark ? 15 : 8; // Size based on type
+		this.r = isShark ? CONFIG.FISH.DEFAULT_SHARK_SIZE : CONFIG.FISH.DEFAULT_PREY_SIZE;
 		this.maxSpeed = isShark
 			? CONFIG.FISH.DEFAULT_SHARK_SPEED
-			: CONFIG.FISH.DEFAULT_PREY_SPEED; // Slider controlled
+			: CONFIG.FISH.DEFAULT_PREY_SPEED; 
 		this.maxForce = isShark ? 0.3 : 0.15;
 		this.isShark = isShark;
 		this.health = 100;
-		this.image = isShark ? predatorImages[0] : preyImages[0]; // Image for visualization
-		this.tailAngle = 0;
-		this.tailSpeed = 0.1;
+		this.image = isShark ? predatorImages[0] : preyImages[0]; 
+		
+		
 	}
 
 	update(fishes, jellyfishes) {
@@ -40,9 +40,6 @@ class Fish {
 		translate(this.pos.x, this.pos.y);
 		rotate(this.vel.heading());
 
-		// Tail animation
-		this.tailAngle = sin(frameCount * this.tailSpeed) * 0.3;
-
 		if (this.image) {
 			drawingContext.shadowBlur = 15;
 			drawingContext.shadowColor = this.isShark ? 'red' : 'blue';
@@ -51,11 +48,11 @@ class Fish {
 			imageMode(CENTER);
 			image(this.image, 0, 0, this.r * 2, this.r * 2);
 
-			// Draw animated tail
-			push();
-			rotate(this.tailAngle);
-			// Draw tail implementation
-			pop();
+			// // Draw animated tail
+			// push();
+			// rotate(this.tailAngle);
+			// // Draw tail implementation
+			// pop();
 		}
 		pop();
 
@@ -93,11 +90,19 @@ class Fish {
 		}
 
 		if (nearestPrey) {
-			let steer = p5.Vector.sub(nearestPrey.pos, this.pos); // Vector toward prey
-			steer.setMag(this.maxSpeed);
-			steer.sub(this.vel);
-			steer.limit(this.maxForce);
-			this.applyForce(steer);
+			let currentTime = millis(); // Get the current time
+			if (currentTime - this.lastDashTime > this.dashCooldown) {
+				let dashDirection = p5.Vector.sub(nearestPrey.pos, this.pos).normalize(); // Direction towards prey
+				this.vel = dashDirection.mult(this.maxSpeed * this.dashSpeed); // Set velocity directly towards prey
+				this.lastDashTime = currentTime; // Update last dash time
+			} else {
+				// Normal hunting behavior if cooldown is active
+				let steer = p5.Vector.sub(nearestPrey.pos, this.pos); // Vector toward prey
+				steer.setMag(this.maxSpeed);
+				steer.sub(this.vel);
+				steer.limit(this.maxForce);
+				this.applyForce(steer);
+			}
 
 			// Eat the prey if close enough
 			if (shortestDist < this.r + nearestPrey.r) {
