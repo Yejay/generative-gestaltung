@@ -31,7 +31,6 @@ class UI {
         this.createButton(buttonDiv, '🐟 Add Fish', () => this.callbacks.onAddFish());
         this.createButton(buttonDiv, '🦈 Add Shark', () => this.callbacks.onAddShark());
         this.createButton(buttonDiv, '🎐 Add Jellyfish', () => this.callbacks.onAddJellyfish());
-        this.createButton(buttonDiv, '🌙 Toggle Night Mode', () => this.callbacks.onNightModeToggle());
         this.createButton(buttonDiv, '🔄 Reset', () => this.callbacks.onReset());
     
         return panel;
