@@ -9,14 +9,20 @@ let cohesionWeight = 1.0;
 const GRID_SIZE = 50;
 let spatialGrid = {};
 let nightMode = false;
-
 if (typeof CONFIG === 'undefined') {
     console.error('CONFIG is not defined! Make sure constants.js is loaded first.');
 }
 
 function preload() {
-    // soundManager = new SoundManager();
-    // soundManager.preload();
+    backgroundVideo = createVideo('https://cdn.pixabay.com/video/2020/04/30/37712-414754673_large.mp4');
+    backgroundVideo.hide(); // Hide the original HTML element
+    // Add an event listener to play the video when it's loaded
+    backgroundVideo.onended(() => {
+        backgroundVideo.loop(); // Loop the video when it ends
+    });
+    backgroundVideo.volume(0); // Mute the video
+    backgroundVideo.play(); // Start playing the video
+
     predatorImages = [
         loadImage('https://img.icons8.com/?size=100&id=dNyJV4Qw3AEk&format=png&color=000000'),
     ]
@@ -31,6 +37,9 @@ function preload() {
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
+    pixelDensity(1);
+    backgroundVideo.loop();
+    backgroundVideo.volume(0); // Mute the video
     // environment = new Environment();
 
     ui = new UI({
@@ -67,8 +76,9 @@ function initializeSimulation() {
 function draw() {
     try {
         // Set background based on night mode
-        let bgColor = nightMode ? color(20, 30, 50) : color(40, 100, 150);
-        background(bgColor);
+        // let bgColor = nightMode ? color(20, 30, 50) : color(40, 100, 150);
+        // background(bgColor);
+        image(backgroundVideo, 0, 0, width, height);
 
         // environment.draw();
 
@@ -154,6 +164,7 @@ function windowResized() {
 }
 
 function mousePressed() {
+    artisticBg.addRipple(mouseX, mouseY);
     if (mouseX < 200 && mouseY < 300) return; // Ignore UI area
     if (mouseButton === LEFT) addNewFish(false);
     if (mouseButton === RIGHT) addNewFish(true);
