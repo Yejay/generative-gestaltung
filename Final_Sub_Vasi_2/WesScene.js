@@ -1,168 +1,417 @@
+let mouseLastX = 0;
+let mouseLastY = 0;
+let mouseMovedRecently = false;
+
 class WesScene {
     constructor() {
         this.windows = [];
-        this.curtains = [];
-        this.audioReactiveElements = [];
-        this.colorOffset = 0;
+        this.fireflies = []; // Array to store fireflies
+        this.buildingWidth = width * 0.8;
+        this.buildingHeight = height * 0.8; 
+        this.buildingX = width/2;
+        this.buildingY = height/2;
+        this.lightsOn = false;
+        for (let i = 0; i < 20; i++) {
+            this.fireflies.push(new Firefly(random(width), random(height)));
+        }
         this.initializeElements();
     }
 
     initializeElements() {
-        // Create a grid of windows
-        const windowColumns = 5;
-        const windowRows = 3;
-        const windowWidth = width / (windowColumns + 1);
-        const windowHeight = height / (windowRows + 1);
+        this.windows = [];
+        
+        const windowWidth = this.buildingWidth * 0.15; 
+        const windowHeight = this.buildingHeight * 0.18;
+        const spacingX = windowWidth * 1.3;
 
-        for (let i = 0; i < windowColumns; i++) {
-            for (let j = 0; j < windowRows; j++) {
-                this.windows.push({
-                    x: (i + 1) * windowWidth,
-                    y: (j + 1) * windowHeight,
-                    width: windowWidth * 0.8,
-                    height: windowHeight * 0.8,
-                    curtainHeight: 0,
-                    targetCurtainHeight: windowHeight * 0.8,
-                    color: color(random([35, 350, 200, 150]), 60, 95),
-                    offset: random(TWO_PI)
-                });
-            }
+        // Top floor (4 windows)
+        const topRowY = this.buildingY - this.buildingHeight * 0.35;
+        const startX = this.buildingX - (spacingX * 1.5);
+        
+        for (let i = 0; i < 4; i++) {
+            this.windows.push({
+                x: startX + (spacingX * i),
+                y: topRowY,
+                width: windowWidth,
+                height: windowHeight,
+                curtainHeight: 0,
+                targetCurtainHeight: windowHeight,
+                color: color(35, 70, 95),
+                offset: random(TWO_PI),
+                isLightOn: false  // Add this
+            });
         }
 
-        // Create audio reactive decorative elements
-        for (let i = 0; i < 20; i++) {
-            this.audioReactiveElements.push({
-                x: random(width),
-                y: random(height),
-                size: random(10, 30),
-                baseSize: random(10, 30),
-                rotation: random(TWO_PI),
-                color: color(random([35, 350, 200, 150]), 60, 95),
+        // Middle floor (4 windows)
+        const middleRowY = this.buildingY - this.buildingHeight * 0.05;
+        for (let i = 0; i < 4; i++) {
+            this.windows.push({
+                x: startX + (spacingX * i),
+                y: middleRowY,
+                width: windowWidth,
+                height: windowHeight,
+                curtainHeight: 0,
+                targetCurtainHeight: windowHeight,
+                color: color(35, 70, 95),
                 offset: random(TWO_PI)
             });
         }
+
+        // Ground floor (2 windows)
+        const bottomRowY = this.buildingY + this.buildingHeight * 0.25;
+        const sideWindowOffset = this.buildingWidth * 0.3;
+        
+        // Left window
+        this.windows.push({
+            x: this.buildingX - sideWindowOffset,
+            y: bottomRowY,
+            width: windowWidth,
+            height: windowHeight,
+            curtainHeight: 0,
+            targetCurtainHeight: windowHeight,
+            color: color(35, 70, 95),
+            offset: random(TWO_PI)
+        });
+
+        // Right window
+        this.windows.push({
+            x: this.buildingX + sideWindowOffset,
+            y: bottomRowY,
+            width: windowWidth,
+            height: windowHeight,
+            curtainHeight: 0,
+            targetCurtainHeight: windowHeight,
+            color: color(35, 70, 95),
+            offset: random(TWO_PI)
+        });
     }
 
+    drawBuilding() {
+        push();
+        rectMode(CENTER);
+        
+        // Main building
+        fill(350, 15, 95);
+        noStroke();
+        rect(this.buildingX, this.buildingY, this.buildingWidth, this.buildingHeight);
+
+        // Door frame - positioned at bottom
+        const doorWidth = this.buildingWidth * 0.15;
+        const doorHeight = this.buildingHeight * 0.25;
+        const doorY = this.buildingY + this.buildingHeight/2 - doorHeight/2; // Aligned to bottom
+        fill(35, 30, 85);
+        rect(this.buildingX, doorY, doorWidth, doorHeight);
+
+        // Door details
+        stroke(35, 30, 90);
+        strokeWeight(2);
+        line(this.buildingX - doorWidth * 0.25, doorY - doorHeight/2, 
+             this.buildingX - doorWidth * 0.25, doorY + doorHeight/2);
+        line(this.buildingX + doorWidth * 0.25, doorY - doorHeight/2, 
+             this.buildingX + doorWidth * 0.25, doorY + doorHeight/2);
+        
+        const lightFixtureY = doorY - doorHeight / 2 - 20;
+        const lightFixtureWidth = doorWidth * 0.5;
+        const lightFixtureHeight = 10;
+         
+        fill(60, 80, 80); // Light fixture color
+        rect(this.buildingX, lightFixtureY, lightFixtureWidth, lightFixtureHeight, 5);
+
+
+        // Decorative vertical lines
+        const lineSpacing = this.buildingWidth / 12;
+        for (let x = -5; x <= 5; x++) {
+            let lineX = this.buildingX + (x * lineSpacing);
+            let yOffset = sin(frameCount * 0.02 + x) * 3;
+            line(lineX, this.buildingY - this.buildingHeight/2 + yOffset,
+                 lineX, this.buildingY + this.buildingHeight/2 + yOffset);
+        }
+        pop();
+    }
+
+    drawStreetLights() {
+        if (!this.lightsOn) return;
+
+        const lightStartX = this.buildingWidth / 2;
+        const lightStartY = -this.buildingHeight / 2;
+
+        [1, -1].forEach(side => {
+            this.drawStreetLight(this.buildingX + side * lightStartX, this.buildingY + lightStartY);
+        });
+    }
+
+    drawStreetLight(x, y) {
+        push();
+        translate(x, y);
+        stroke(35, 30, 90);
+        strokeWeight(3);
+        fill(60, 80, 80);
+        rect(-10, 0, 20, 10);
+        noStroke();
+        for (let i = 0; i < 5; i++) {
+            fill(60, 80, 95, 0.1 - i * 0.02);
+            beginShape();
+            vertex(-10, 0);
+            vertex(10, 0);
+            vertex(150, this.buildingHeight);
+            vertex(-150, this.buildingHeight);
+            endShape(CLOSE);
+        }
+        pop();
+    }
+    
     update(audioLevel) {
-        this.colorOffset += 0.01;
-        
-        // Debug audio level in Wes scene
-        console.log('Wes Scene Audio Level:', audioLevel);
-        
-        // Update curtain animations with amplified audio reaction
-        this.windows.forEach((window, index) => {
+        if (dist(mouseX, mouseY, mouseLastX, mouseLastY) > 1) {
+            mouseMovedRecently = true;
+        } else {
+            mouseMovedRecently = false;
+        }
+        mouseLastX = mouseX;
+        mouseLastY = mouseY;
+
+        let mousePos = createVector(mouseX, mouseY);
+
+        // Update fireflies
+        if (this.isDarkMode) {
+            this.fireflies.forEach(firefly => {
+                firefly.update(mousePos, mouseMovedRecently);
+            });
+        }
+        // Curtain movements with sound
+        this.windows.forEach(window => {
             let modifiedAudio = audioLevel * 2 + sin(frameCount * 0.05 + window.offset) * 0.2;
             window.curtainHeight = lerp(window.curtainHeight, 
                                      window.targetCurtainHeight * (0.6 + modifiedAudio), 
                                      0.1);
         });
+    }
 
-        // Update decorative elements with more pronounced audio reaction
-        this.audioReactiveElements.forEach((element, index) => {
-            let modifiedAudio = audioLevel * 3 + sin(frameCount * 0.05 + element.offset) * 0.2;
-            element.size = element.baseSize * (1 + modifiedAudio);
-            element.rotation += 0.02 * (1 + audioLevel * 5);
+    drawLightEffects() {
+        // Illuminate areas from lit windows
+        this.windows.forEach(window => {
+            if (window.isLightOn) {
+                push();
+                noStroke();
+    
+                for (let i = 2; i > 0; i--) { 
+                    fill(35, 70, 95, 0.05 * i);
+                    let size = window.width * (1.2 + i * 0.2); 
+                    ellipse(window.x, window.y, size, size * 0.5); 
+                }
+                pop();
+            }
         });
+    
+        // Street light 
+        if (this.lightsOn) {
+            const lightStartX = this.buildingWidth/2;
+            const lightStartY = -this.buildingHeight/2;
+            
+            [1, -1].forEach(side => {
+                push();
+                noStroke();
+                for (let i = 3; i > 0; i--) {
+                    fill(60, 80, 95, 0.05 / i);
+                    beginShape();
+                    vertex(this.buildingX + side * lightStartX, this.buildingY + lightStartY);
+                    vertex(this.buildingX + side * (lightStartX + 150), this.buildingY + this.buildingHeight/2);
+                    vertex(this.buildingX + side * (lightStartX - 150), this.buildingY + this.buildingHeight/2);
+                    endShape(CLOSE);
+                }
+                pop();
+            });
+        }
+        // Door light
+        if (this.lightsOn) {
+            const doorLightY = this.buildingY + this.buildingHeight / 2 - this.buildingHeight * 0.25 - 20;
+            const doorLightWidth = this.buildingWidth * 0.1;
+            push();
+            noStroke();
+            for (let i = 3; i > 0; i--) {
+                fill(60, 80, 95, 0.05 / i); 
+                let size = doorLightWidth * (1 + i * 0.4); 
+                ellipse(this.buildingX, doorLightY, size, size * 0.6); 
+            }
+            pop();
+        }
+    
     }
 
     display() {
-        background(350, 10, 98); // Soft cream background
-
-        // Draw central symmetrical building facade
+        background(350, 10, 98);
+    
         push();
-        translate(width/2, height/2);
-        this.drawBuildingFacade();
-        pop();
-
-        // Draw windows with curtains
-        this.windows.forEach(window => {
-            this.drawWindow(window);
-        });
-
-        // Draw decorative elements
-        this.audioReactiveElements.forEach(element => {
-            this.drawDecorativeElement(element);
-        });
-
-        // Debug visualization of audio level
-        this.drawAudioDebug();
-    }
-
-    drawBuildingFacade() {
-        // Main building outline
-        noStroke();
-        fill(350, 15, 95);
         rectMode(CENTER);
-        rect(0, 0, width * 0.9, height * 0.9);
+        
+        if (this.isDarkMode) {
+            background(0);
+            noStroke();
+            fill(0, 0, 5);  
+            rect(this.buildingX, this.buildingY, this.buildingWidth, this.buildingHeight);
+    
+            fill(0, 0, 8);  
+            const doorWidth = this.buildingWidth * 0.15;
+            const doorHeight = this.buildingHeight * 0.25;
+            const doorY = this.buildingY + this.buildingHeight/2 - doorHeight/2;
+            rect(this.buildingX, doorY, doorWidth, doorHeight);
+    
+            // Barely visible lines
+            stroke(0, 0, 10);  
+            strokeWeight(0.5); 
+            const lineSpacing = this.buildingWidth / 12;
+            for (let x = -5; x <= 5; x++) {
+                let lineX = this.buildingX + (x * lineSpacing);
+                line(lineX, this.buildingY - this.buildingHeight/2,
+                     lineX, this.buildingY + this.buildingHeight/2);
+            }
+        } else {
+            this.drawBuilding();
+        }
+        pop();
+    
 
-        // Decorative lines with subtle animation
-        stroke(35, 30, 90);
-        strokeWeight(2);
-        for (let i = -4; i <= 4; i++) {
-            let yOffset = sin(frameCount * 0.02 + i) * 5;
-            line(i * 50, -height/2 + yOffset, i * 50, height/2 + yOffset);
+        if (this.isDarkMode) {
+            this.windows.forEach(window => {
+                window.isLightOn = true;
+            });
+            this.drawLightEffects();
+        }
+    
+        this.drawStreetLights();
+        this.windows.forEach(window => this.drawWindow(window));
+        if (this.isDarkMode) {
+            this.fireflies.forEach(firefly => firefly.display());
         }
     }
 
     drawWindow(window) {
-        // Window frame
+        push();
+        rectMode(CENTER);
+        
+        // Window frame with mode-dependent colors
         stroke(35, 30, 90);
         strokeWeight(2);
-        fill(window.color);
+        fill(this.isDarkMode ? window.color : color(35, 10, 85));
         rect(window.x, window.y, window.width, window.height);
+    
+        // Window divisions
+        line(window.x, window.y - window.height/2, 
+             window.x, window.y + window.height/2);
+        line(window.x - window.width/2, window.y, 
+             window.x + window.width/2, window.y);
 
-        // Curtains with subtle wave effect
-        noStroke();
-        fill(350, 30, 95, 0.8);
+        // Lamp and glow effect
+        if (window.isLightOn) {
+            noStroke();
+            drawingContext.save();
+            beginShape();
+            vertex(window.x - window.width/2, window.y - window.height/2);
+            vertex(window.x + window.width/2, window.y - window.height/2);
+            vertex(window.x + window.width/2, window.y + window.height/2);
+            vertex(window.x - window.width/2, window.y + window.height/2);
+            endShape(CLOSE);
+            drawingContext.clip();
+         
+            // Lamp fixture - a small rectangle
+            fill(35, 30, 85);
+            rect(window.x, window.y - window.height * 0.2, window.width * 0.1, window.height * 0.1);
+            
+            // Light glow - elongated shape
+            for (let i = 3; i > 0; i--) {
+                fill(35, 70, 95, 0.1);
+                ellipse(window.x, window.y, 
+                        window.width * 0.01 * (i + 1),
+                        window.height * 0.02 * (i + 1));
+            }
+            
+            // Core light
+            fill(35, 80, 95, 0.15);
+            ellipse(window.x, window.y, window.width * 0.01, window.height * 0.02);
+            
+            drawingContext.restore();
+         }
         
-        // Left curtain with wave
-        beginShape();
-        for (let y = 0; y < window.curtainHeight; y += 5) {
-            let xOff = sin(y * 0.1 + frameCount * 0.05) * 5;
-            let x = window.x - window.width/2 + xOff;
-            vertex(x, window.y - window.height/2 + y);
-        }
-        endShape();
-
-        // Right curtain with wave
-        beginShape();
-        for (let y = 0; y < window.curtainHeight; y += 5) {
-            let xOff = sin(y * 0.1 + frameCount * 0.05) * 5;
-            let x = window.x + window.width/2 - window.width * 0.3 + xOff;
-            vertex(x, window.y - window.height/2 + y);
-        }
-        endShape();
-    }
-
-    drawDecorativeElement(element) {
-        push();
-        translate(element.x, element.y);
-        rotate(element.rotation);
+        // Gold curtain rod
+        stroke(60, 80, 80);
+        strokeWeight(3);
+        line(window.x - window.width/2 - 10, window.y - window.height/2 - 5,
+             window.x + window.width/2 + 10, window.y - window.height/2 - 5);
+             
+        // Rod ends
         noStroke();
-        fill(element.color);
+        fill(60, 80, 80);
+        circle(window.x - window.width/2 - 10, window.y - window.height/2 - 5, 8);
+        circle(window.x + window.width/2 + 10, window.y - window.height/2 - 5, 8);
+
+        // Curtains on top
+        noStroke();
+        fill(350, 40, 95, 0.9);
         
-        // Draw a more complex decorative shape
+        const folds = 6;
+        const foldWidth = window.width / (folds * 2);
+        
         beginShape();
-        for (let i = 0; i < 8; i++) {
-            let angle = TWO_PI * i / 8;
-            let radius = element.size * (1 + sin(angle * 2 + frameCount * 0.05) * 0.2);
-            let x = cos(angle) * radius;
-            let y = sin(angle) * radius;
-            vertex(x, y);
+        vertex(window.x - window.width/2, window.y - window.height/2);
+        
+        for (let i = 0; i <= folds; i++) {
+            let x = window.x - window.width/2 + i * foldWidth;
+            let xOffset = sin(i * PI + frameCount * 0.05) * 5;
+            
+            vertex(x + xOffset, window.y - window.height/2 + window.curtainHeight);
+            
+            if (i < folds) {
+                vertex(x + foldWidth/2 + xOffset, 
+                      window.y - window.height/2 + window.curtainHeight * 0.9);
+            }
         }
+        
+        for (let i = folds; i >= 0; i--) {
+            let x = window.x - window.width/2 + i * foldWidth;
+            let xOffset = sin(i * PI + frameCount * 0.05) * 5;
+            vertex(x + xOffset, window.y - window.height/2);
+        }
+        
+        endShape(CLOSE);
+
+        beginShape();
+        vertex(window.x + window.width/2, window.y - window.height/2);
+        
+        for (let i = 0; i <= folds; i++) {
+            let x = window.x + window.width/2 - i * foldWidth;
+            let xOffset = sin(i * PI + frameCount * 0.05) * 5;
+            
+            vertex(x + xOffset, window.y - window.height/2 + window.curtainHeight);
+            
+            if (i < folds) {
+                vertex(x - foldWidth/2 + xOffset, 
+                      window.y - window.height/2 + window.curtainHeight * 0.9);
+            }
+        }
+        
+        for (let i = folds; i >= 0; i--) {
+            let x = window.x + window.width/2 - i * foldWidth;
+            let xOffset = sin(i * PI + frameCount * 0.05) * 5;
+            vertex(x + xOffset, window.y - window.height/2);
+        }
+        
         endShape(CLOSE);
         pop();
     }
 
-    // Debug visualization
-    drawAudioDebug() {
-        fill(0);
-        noStroke();
-        text('Audio Level: ' + nf(audioLevel, 1, 3), 20, 20);
-        rect(20, 30, audioLevel * 100, 10);
+    resize() {
+        this.buildingWidth = width * 0.6;
+        this.buildingHeight = height * 0.7;
+        this.buildingX = width/2;
+        this.buildingY = height/2;
+        this.initializeElements();
     }
 
-    resize() {
-        this.initializeElements();
+    toggleLights() {
+        this.lightsOn = !this.lightsOn;
+    }
+
+
+    toggleDarkMode() {
+        this.isDarkMode = !this.isDarkMode;
     }
 }

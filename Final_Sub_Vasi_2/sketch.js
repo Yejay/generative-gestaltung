@@ -7,41 +7,34 @@ let mic;
 let fft;
 let audioLevel = 0;
 let isWesMode = false;
+let avoidPattern = false;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
     colorMode(HSB, 360, 100, 100, 1);
     
-    // Audio setup with proper initialization
-    userStartAudio(); // Add this to ensure audio context starts
+    userStartAudio();
     mic = new p5.AudioIn();
     mic.start();
     fft = new p5.FFT();
     fft.setInput(mic);
     
-    // Initialize components
     colorPalette = new ColorPalette();
     neonGrid = new NeonGrid();
     symmetricalPattern = new SymmetricalPattern();
     wesScene = new WesScene();
     
-    // Initial particles
     for (let i = 0; i < 50; i++) {
         particles.push(new LightParticle());
     }
 }
 
 function draw() {
-    // Update audio analysis with smoothing
     fft.analyze();
     let targetLevel = mic.getLevel();
-    audioLevel = lerp(audioLevel, targetLevel * 5, 0.1); // Amplify and smooth the audio level
-    
-    // Debug audio level
-    console.log('Audio Level:', audioLevel);
+    audioLevel = lerp(audioLevel, targetLevel * 5, 0.1);
     
     if (!isWesMode) {
-        // Cyberpunk mode
         let fadeAmount = map(audioLevel, 0, 1, 0.1, 0.05);
         background(0, 0, 0, fadeAmount);
         
@@ -52,19 +45,17 @@ function draw() {
         symmetricalPattern.display();
         
         for (let particle of particles) {
-            particle.update(audioLevel);
+            particle.update(audioLevel, symmetricalPattern, avoidPattern, symmetricalPattern.blackHoleMode);
             particle.display();
         }
         
-        // Create new particles based on audio level
-        if (random() < audioLevel * 2) { // Adjusted multiplier
+        if (random() < audioLevel * 2) {
             particles.push(new LightParticle(random(width), random(height)));
             if (particles.length > 150) {
                 particles.splice(0, 1);
             }
         }
     } else {
-        // Wes Anderson mode
         wesScene.update(audioLevel);
         wesScene.display();
     }
@@ -72,9 +63,8 @@ function draw() {
 
 function mouseMoved() {
     if (!isWesMode) {
-        // Only create particles in cyberpunk mode
         let p = new LightParticle(mouseX, mouseY);
-        p.radius *= (1 + audioLevel * 10); // Adjusted multiplier
+        p.radius *= (1 + audioLevel * 10);
         particles.push(p);
         
         if (particles.length > 100) {
@@ -86,14 +76,33 @@ function mouseMoved() {
 function keyPressed() {
     if (key === ' ') {
         isWesMode = !isWesMode;
-        // Reset particles when switching to Wes mode
         if (isWesMode) {
             particles = [];
         }
     }
     if (key === 'r') {
-        // R key randomizes the pattern
         symmetricalPattern.randomize();
+    }
+    if (key === 'f') {
+        avoidPattern = !avoidPattern;
+        if (avoidPattern && symmetricalPattern.blackHoleMode) {
+            symmetricalPattern.blackHoleMode = false;
+        }
+    }
+    if (key === 'b') {
+        symmetricalPattern.toggleBlackHoleMode();
+        if (symmetricalPattern.blackHoleMode && avoidPattern) {
+            avoidPattern = false;
+        }
+    }
+    if (key === 'g') {
+        neonGrid.toggleVisibility();
+    }
+    if (key === 'l') {
+        wesScene.toggleLights();
+    }
+    if (key === 'd') {
+        wesScene.toggleDarkMode();
     }
 }
 

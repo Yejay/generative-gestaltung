@@ -7,6 +7,9 @@ class SymmetricalPattern {
         this.isCyberpunkMode = true;
         this.rotationSpeed = 0.01;
         this.lineWeight = 1;
+        this.blackHoleMode = false;
+        this.absorbedEnergy = 0;
+        this.maxEnergy = 100;
         this.generatePoints();
     }
 
@@ -19,7 +22,7 @@ class SymmetricalPattern {
             this.points.push({ 
                 x, 
                 y,
-                brightness: random(0.5, 1)
+                brightness: this.blackHoleMode ? 0.1 : random(0.5, 1)
             });
         }
     }
@@ -31,7 +34,6 @@ class SymmetricalPattern {
             this.rotationSpeed = 0.01;
             this.lineWeight = 1;
         } else {
-            // Wes Anderson mode: more structured, slower movement
             this.numPoints = 12;
             this.rotationSpeed = 0.005;
             this.lineWeight = 2;
@@ -46,12 +48,24 @@ class SymmetricalPattern {
         this.generatePoints();
     }
 
+    absorbParticle(particleColor) {
+        this.absorbedEnergy = min(this.absorbedEnergy + 1, this.maxEnergy);
+        
+        if (this.blackHoleMode) {
+            let energyRatio = this.absorbedEnergy / this.maxEnergy;
+            this.points.forEach(point => {
+                point.brightness = map(energyRatio, 0, 1, 0.1, 1);
+            });
+        }
+    }
+
     update() {
         this.angle += this.rotationSpeed;
         
-        // Update point brightness with slight oscillation
-        for (let point of this.points) {
-            point.brightness = map(sin(frameCount * 0.05 + this.points.indexOf(point)), -1, 1, 0.5, 1);
+        if (!this.blackHoleMode) {
+            for (let point of this.points) {
+                point.brightness = map(sin(frameCount * 0.05 + this.points.indexOf(point)), -1, 1, 0.5, 1);
+            }
         }
     }
 
@@ -60,43 +74,94 @@ class SymmetricalPattern {
         translate(width / 2, height / 2);
         rotate(this.angle);
         
-        // Draw connections between points
+        if (this.blackHoleMode) {
+            noStroke();
+            fill(0, 0, 0, 0.9);
+            circle(0, 0, this.radius * 1.5);
+            
+            let energyRatio = this.absorbedEnergy / this.maxEnergy;
+            let glowColor = colorPalette.getPatternColor();
+            for (let i = 5; i > 0; i--) {
+                fill(hue(glowColor), 
+                     saturation(glowColor), 
+                     brightness(glowColor), 
+                     energyRatio * 0.15 / i);
+                circle(0, 0, this.radius * (1.5 + i * 0.3));
+            }
+        }
+        
         for (let i = 0; i < this.points.length; i++) {
             for (let j = i + 1; j < this.points.length; j++) {
                 let p1 = this.points[i];
                 let p2 = this.points[j];
-                
-                // Calculate distance for line opacity
                 let d = dist(p1.x, p1.y, p2.x, p2.y);
-                let alpha = map(d, 0, this.radius * 2, 0.8, 0.1);
+                let lineColor = colorPalette.getPatternColor();
+                let energyRatio = this.blackHoleMode ? this.absorbedEnergy / this.maxEnergy : 0;
                 
-                let lineColor = this.isCyberpunkMode ? 
-                    colorPalette.getPatternColor() : 
-                    colorPalette.getPastelColor();
-                
-                stroke(hue(lineColor), 
-                       saturation(lineColor), 
-                       brightness(lineColor) * (p1.brightness + p2.brightness) / 2, 
-                       alpha);
-                strokeWeight(this.lineWeight);
-                line(p1.x, p1.y, p2.x, p2.y);
+                if (this.blackHoleMode) {
+                    // Enhanced glow in black hole mode, tied to absorbed energy
+                    let alpha = map(d, 0, this.radius * 2, 0.9, 0.2) * energyRatio;
+                    
+                    stroke(hue(lineColor), 
+                           saturation(lineColor), 
+                           brightness(lineColor) * (p1.brightness + p2.brightness) / 2, 
+                           alpha);
+                    strokeWeight(this.lineWeight + 2);
+                    line(p1.x, p1.y, p2.x, p2.y);
+                    
+                    for (let g = 3; g > 0; g--) {
+                        stroke(hue(lineColor), 
+                               saturation(lineColor), 
+                               brightness(lineColor), 
+                               alpha / (g * 2));
+                        strokeWeight(this.lineWeight + 2 + g * 2);
+                        line(p1.x, p1.y, p2.x, p2.y);
+                    }
+                } else {
+                    let alpha = map(d, 0, this.radius * 2, 0.8, 0.1);
+                    stroke(hue(lineColor), 
+                           saturation(lineColor), 
+                           brightness(lineColor) * (p1.brightness + p2.brightness) / 2, 
+                           alpha);
+                    strokeWeight(this.lineWeight);
+                    line(p1.x, p1.y, p2.x, p2.y);
+                }
             }
         }
         
-        // Draw points
         for (let point of this.points) {
-            let pointColor = this.isCyberpunkMode ? 
-                colorPalette.getAccentColor() : 
-                colorPalette.getPastelColor();
+            let pointColor = colorPalette.getPatternColor();
+            
+            if (this.blackHoleMode) {
+                let energyRatio = this.absorbedEnergy / this.maxEnergy;
+                for (let g = 4; g > 0; g--) {
+                    fill(hue(pointColor), 
+                         saturation(pointColor), 
+                         brightness(pointColor) * point.brightness,
+                         0.3 * energyRatio / g);
+                    noStroke();
+                    circle(point.x, point.y, 8 + g * 4);
+                }
+            }
             
             fill(hue(pointColor), 
                  saturation(pointColor), 
                  brightness(pointColor) * point.brightness);
             noStroke();
-            circle(point.x, point.y, 5);
+            circle(point.x, point.y, this.blackHoleMode ? 6 : 5);
         }
         
         pop();
+    }
+
+    toggleBlackHoleMode() {
+        this.blackHoleMode = !this.blackHoleMode;
+        if (this.blackHoleMode) {
+            this.absorbedEnergy = 0;
+            this.points.forEach(point => point.brightness = 0.1);
+        } else {
+            this.generatePoints();
+        }
     }
 
     resize() {

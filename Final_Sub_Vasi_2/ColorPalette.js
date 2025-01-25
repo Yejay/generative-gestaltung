@@ -1,24 +1,22 @@
 class ColorPalette {
     constructor() {
-        // Cyberpunk colors
         this.neonColors = [
-            color(320, 100, 100), // Pink
-            color(180, 100, 100), // Cyan
-            color(280, 100, 100), // Purple
-            color(60, 100, 100)   // Yellow
+            color(320, 100, 100), 
+            color(180, 100, 100), 
+            color(280, 100, 100), 
+            color(60, 100, 100)   
         ];
         
-        // Wes Anderson inspired colors
         this.pastelColors = [
-            color(35, 70, 100),   // Soft yellow
-            color(350, 60, 100),  // Pale pink
-            color(200, 50, 100),  // Light blue
-            color(150, 40, 100)   // Mint green
+            color(35, 70, 100),   
+            color(350, 60, 100),  
+            color(200, 50, 100),  
+            color(150, 40, 100)   
         ];
         
-        this.gridColor = color(180, 100, 100);      // Cyan for grid
-        this.patternColor = color(320, 100, 100);   // Pink for pattern
-        this.accentColor = color(60, 100, 100);     // Yellow for accents
+        this.gridColor = color(180, 100, 100);      
+        this.patternColor = color(320, 100, 100); 
+        this.accentColor = color(60, 100, 100);    
     }
 
     getNeonColor() {
@@ -41,7 +39,6 @@ class ColorPalette {
         return this.accentColor;
     }
 
-    // Method to smoothly transition between colors
     lerpColors(c1, c2, amt) {
         let h1 = hue(c1);
         let s1 = saturation(c1);
@@ -51,7 +48,6 @@ class ColorPalette {
         let s2 = saturation(c2);
         let b2 = brightness(c2);
         
-        // Handle hue wrapping
         if (abs(h1 - h2) > 180) {
             if (h1 > h2) h2 += 360;
             else h1 += 360;
