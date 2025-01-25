@@ -33,8 +33,6 @@ class NeonGrid {
         for (let i = this.lightPoints.length - 1; i >= 0; i--) {
             let point = this.lightPoints[i];
             const speed = 5;
-
-            // Move point
             if (point.direction === 'down') {
                 point.y += speed;
             } else {
@@ -55,7 +53,6 @@ class NeonGrid {
             if (point.x < 0 || point.y > height) {
                 this.lightPoints.splice(i, 1);
             }
-
             let lineKey = point.direction === 'down' 
                 ? `v${Math.round(point.x/this.cellSize)}` 
                 : `h${Math.round(point.y/this.cellSize)}`;

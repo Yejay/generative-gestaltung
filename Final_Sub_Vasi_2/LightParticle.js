@@ -14,8 +14,6 @@ class LightParticle {
 
     update(audioLevel = 0, pattern = null, avoidPattern = false, blackHoleMode = false) {
         if (this.isSwallowed) return;
-
-        // Update position with audio-reactive speed
         let speedMultiplier = 1 + audioLevel * 2;
         
         if (pattern && (avoidPattern || blackHoleMode)) {

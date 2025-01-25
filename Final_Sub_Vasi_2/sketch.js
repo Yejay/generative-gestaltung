@@ -12,7 +12,8 @@ let avoidPattern = false;
 function setup() {
     createCanvas(windowWidth, windowHeight);
     colorMode(HSB, 360, 100, 100, 1);
-    
+    window.mouseLastX = 0;  
+    window.mouseLastY = 0;
     userStartAudio();
     mic = new p5.AudioIn();
     mic.start();

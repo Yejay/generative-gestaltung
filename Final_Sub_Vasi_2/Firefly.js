@@ -32,7 +32,7 @@ class Firefly {
         if (mouseMoved) {
             this.blendFactor = lerp(this.blendFactor, 1, 0.1); // Increase blend factor
         } else {
-            this.blendFactor = lerp(this.blendFactor, 0, 0.01); // Gradually fade back to wandering
+            this.blendFactor = lerp(this.blendFactor, 0, 0.13); // Gradually fade back to wandering
         }
 
         let wanderForce = p5.Vector.random2D().mult(0.2 * (1 - this.blendFactor));
@@ -48,7 +48,6 @@ class Firefly {
     }
 
     display() {
-        // Draw the glowing effect
         push();
         noStroke();
         for (let i = 3; i > 0; i--) {
@@ -56,7 +55,6 @@ class Firefly {
             ellipse(this.position.x, this.position.y, this.glowSize * i, this.glowSize * i);
         }
 
-        // Core of the firefly
         fill(60, 100, 95);
         ellipse(this.position.x, this.position.y, this.glowSize * 0.5);
         pop();

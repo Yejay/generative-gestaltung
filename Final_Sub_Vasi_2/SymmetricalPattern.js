@@ -99,7 +99,6 @@ class SymmetricalPattern {
                 let energyRatio = this.blackHoleMode ? this.absorbedEnergy / this.maxEnergy : 0;
                 
                 if (this.blackHoleMode) {
-                    // Enhanced glow in black hole mode, tied to absorbed energy
                     let alpha = map(d, 0, this.radius * 2, 0.9, 0.2) * energyRatio;
                     
                     stroke(hue(lineColor), 
